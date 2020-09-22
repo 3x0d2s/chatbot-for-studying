@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30128.74
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "VK_BOT", "VK_BOT\VK_BOT.pyproj", "{6A6A2A87-4EFD-43B6-B7F5-7AC66B7F4752}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A6A2A87-4EFD-43B6-B7F5-7AC66B7F4752}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A6A2A87-4EFD-43B6-B7F5-7AC66B7F4752}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {781E3C8E-021F-4D1B-8F8A-E0CD6C7CCA19}
+	EndGlobalSection
+EndGlobal
