@@ -1,17 +1,23 @@
 import sqlite3
 
+
 class scheduleDirect:
-    rowcount = 0
+
     def __init__(self, database):
         """Подключаемся к БД и сохраняем курсор соединения"""
         self.connection = sqlite3.connect(database, check_same_thread=False)
         self.cursor = self.connection.cursor()
 
-    def get_Lesson(self, id_lesson):
+    def get_Lesson(self, weekday):
         with self.connection:
-            #self.cursor.execute("SELECT * FROM `schedule_saturday` WHERE `id_lesson` = ?", (str(id_lesson),))
-            self.cursor.execute("SELECT * FROM `schedule_saturday`")
-            rowcount = self.cursor.rowcount
+            self.cursor.execute(
+                "SELECT * FROM `schedule` WHERE weekday IN (?)", (weekday, ))
+            return self.cursor.fetchall()
+
+    def get_Homework(self, weekday):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT lesson, task FROM `homework` WHERE weekday IN (?)", (weekday, ))
             return self.cursor.fetchall()
 
     def add_paymentToStack(self, user_id, code):
@@ -21,7 +27,8 @@ class scheduleDirect:
 
     def delete_payment(self, user_id):
         with self.connection:
-            self.cursor.execute("DELETE FROM `payments` WHERE `user_id` = ?", (user_id,))
+            self.cursor.execute(
+                "DELETE FROM `payments` WHERE `user_id` = ?", (user_id,))
 
     def close(self):
         """Закрываем соединение с БД"""
