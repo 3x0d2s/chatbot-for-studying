@@ -20,6 +20,13 @@ class scheduleDirect:
                 "SELECT lesson, task FROM `homework` WHERE weekday IN (?)", (weekday, ))
             return self.cursor.fetchall()
 
+    def get_admins(self):
+        with self.connection:
+            self.cursor.execute("SELECT * FROM `admins`")
+            return self.cursor.fetchall()
+
+            
+
     def add_paymentToStack(self, user_id, code):
         """Добавляем"""
         with self.connection:

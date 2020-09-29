@@ -25,11 +25,35 @@ def write_msg_withKeyboard(user_id, message, keyboard):
         message), 'random_id': 0, 'keyboard': keyboard.get_keyboard()})
 
 
-def mainMenu():
+def mainMenu(event):
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Расписание', color=VkKeyboardColor.POSITIVE)
     keyboard.add_button('Домашнее задание', color=VkKeyboardColor.POSITIVE)
+    #
+    if userIsAdmin(event) == True:
+        keyboard.add_line()
+        keyboard.add_button(
+            'Редактирование', color=VkKeyboardColor.SECONDARY)
     write_msg_withKeyboard(event.user_id, 'Главное меню', keyboard)
+
+
+def userIsAdmin(event):
+    adminsList = getAdminList()
+    rowcount = len(adminsList)
+    row = 0
+    userIsAdmin = False
+    while row < rowcount:
+        if event.user_id == adminsList[row][0]:
+            userIsAdmin = True
+            break
+        row = row + 1
+    return userIsAdmin
+
+
+def getAdminList():
+    db = scheduleDirect('Data Base/db.db')
+    admins = db.get_admins()
+    return admins
 
 
 def ShowWeekdays():
@@ -104,14 +128,18 @@ def homework(weekday):
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def commandDirect(msg):
+def editing():
+    print('Кто-то зашел в раздел редактирования...')
+
+
+def commandDirect(event, msg):
     global homework_flag
     global schedule_flag
     #
     if msg == 'Start':
-        mainMenu()
+        mainMenu(event)
     elif msg == 'В главное меню':
-        mainMenu()
+        mainMenu(event)
     elif msg == 'Расписание':
         schedule_flag = True
         ShowWeekdays()
@@ -130,6 +158,9 @@ def commandDirect(msg):
         ScheduleOrHomework()
     elif msg == 'Суббота':
         ScheduleOrHomework()
+    elif msg == 'Редактирование':
+        if userIsAdmin(event) == True:
+            editing()
 
 
 if __name__ == '__main__':
@@ -137,4 +168,4 @@ if __name__ == '__main__':
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:
                 msg = event.text
-                commandDirect(msg)
+                commandDirect(event, msg)
