@@ -12,6 +12,7 @@ longpoll = VkLongPoll(vk_session)
 #
 homework_flag = False
 schedule_flag = False
+addHomework_flag = False
 #
 
 
@@ -34,6 +35,9 @@ def mainMenu(event):
         keyboard.add_line()
         keyboard.add_button(
             'Редактирование', color=VkKeyboardColor.SECONDARY)
+    #
+    keyboard.add_line()
+    keyboard.add_button('О боте', color=VkKeyboardColor.SECONDARY)
     write_msg_withKeyboard(event.user_id, 'Главное меню', keyboard)
 
 
@@ -53,6 +57,7 @@ def userIsAdmin(event):
 def getAdminList():
     db = scheduleDirect('Data Base/db.db')
     admins = db.get_admins()
+    db.close()
     return admins
 
 
@@ -67,8 +72,14 @@ def ShowWeekdays():
     keyboard.add_button('Пятница', color=VkKeyboardColor.SECONDARY)
     keyboard.add_button('Суббота', color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
-    keyboard.add_button('В главное меню', color=VkKeyboardColor.SECONDARY)
+    keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+    #
     write_msg_withKeyboard(event.user_id, 'Выберите день недели', keyboard)
+
+
+def AboutText():
+    write_msg(event.user_id,
+              'Бот разработан Максимом Ждановым - vk.com/exodus_outcome')
 
 
 def ScheduleOrHomework():
@@ -86,6 +97,7 @@ def ScheduleOrHomework():
 def schedule(weekday):
     db = scheduleDirect('Data Base/db.db')
     lesson = db.get_Lesson(weekday)
+    db.close()
     #
     listLessons = []
     rowcount = len(lesson)
@@ -110,6 +122,7 @@ def schedule(weekday):
 def homework(weekday):
     db = scheduleDirect('Data Base/db.db')
     homework_tasks = db.get_Homework(weekday)
+    db.close()
     #
     listHomework = []
     rowcount = len(homework_tasks)
@@ -129,12 +142,28 @@ def homework(weekday):
 
 
 def editing():
-    print('Кто-то зашел в раздел редактирования...')
+    keyboard = VkKeyboard(one_time=True)
+    keyboard.add_button('Добавить домашнее задание',
+                        color=VkKeyboardColor.SECONDARY)
+    keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
+
+
+def add_homework():
+    keyboard = VkKeyboard(one_time=True)
+    keyboard.add_button('Выбрать день недели',
+                        color=VkKeyboardColor.SECONDARY)
+    keyboard.add_button('Указать число',
+                        color=VkKeyboardColor.SECONDARY)
+    keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+    msg = 'Выберите вариант указания даты сдачи домашнего задания.'
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
 def commandDirect(event, msg):
     global homework_flag
     global schedule_flag
+    global addHomework_flag
     #
     if msg == 'Start':
         mainMenu(event)
@@ -161,6 +190,11 @@ def commandDirect(event, msg):
     elif msg == 'Редактирование':
         if userIsAdmin(event) == True:
             editing()
+    elif msg == 'Добавить домашнее задание':
+        addHomework_flag = True
+        add_homework()
+    elif msg == 'О боте':
+        AboutText()
 
 
 if __name__ == '__main__':

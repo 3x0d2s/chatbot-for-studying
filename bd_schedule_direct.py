@@ -30,7 +30,8 @@ class scheduleDirect:
     def add_paymentToStack(self, user_id, code):
         """Добавляем"""
         with self.connection:
-            return self.cursor.execute("INSERT INTO `payments` (`user_id`, 'code') VALUES(?,?)", (user_id, code))
+            return self.cursor.execute("INSERT INTO `payments` (`user_id`, 'code') VALUES(?,?)",
+                                         (user_id, code))
 
     def delete_payment(self, user_id):
         with self.connection:
