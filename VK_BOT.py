@@ -4,6 +4,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.utils import get_random_id
 #
 from bd_schedule_direct import scheduleDirect
+from setHomework import addHomework
 import config
 #
 vk_session = vk_api.VkApi(token=config.token)
@@ -13,6 +14,9 @@ longpoll = VkLongPoll(vk_session)
 homework_flag = False
 schedule_flag = False
 addHomework_flag = False
+#
+addHomework = addHomework()
+step_code = 0
 #
 
 
@@ -145,18 +149,57 @@ def editing():
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Добавить домашнее задание',
                         color=VkKeyboardColor.SECONDARY)
+    keyboard.add_line()
     keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
 def add_homework():
     keyboard = VkKeyboard(one_time=True)
-    keyboard.add_button('Выбрать день недели',
-                        color=VkKeyboardColor.SECONDARY)
+    # keyboard.add_button('Выбрать день недели',
+    #                    color=VkKeyboardColor.SECONDARY)
     keyboard.add_button('Указать число',
                         color=VkKeyboardColor.SECONDARY)
-    keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+    keyboard.add_line()
+    keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
     msg = 'Выберите вариант указания даты сдачи домашнего задания.'
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
+
+
+def setDate():
+    keyboard = VkKeyboard(one_time=True)
+    keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
+    msg = 'Напишите число в формате (День).(Месяц).(Год). Например 03.11.2018'
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
+
+
+def setLesson():
+    keyboard = VkKeyboard(one_time=True)
+    keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
+    msg = 'Напишите название урока'
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
+
+
+def setTask():
+    keyboard = VkKeyboard(one_time=True)
+    keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
+    msg = 'Напишите все задачи'
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
+
+
+def setHomework():
+    date = addHomework.getDate()
+    weekDay = addHomework.getWeekday()
+    lesson = addHomework.getLesson()
+    task = addHomework.getTask()
+    #
+    db = scheduleDirect('Data Base/db.db')
+    db.add_Homework(date, weekDay, lesson, task)
+    db.close()
+    #
+    keyboard = VkKeyboard(one_time=True)
+    keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+    msg = 'Домашнее задание добавлено!'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
@@ -164,6 +207,8 @@ def commandDirect(event, msg):
     global homework_flag
     global schedule_flag
     global addHomework_flag
+    global step_code
+    global addHomework
     #
     if msg == 'Start':
         mainMenu(event)
@@ -193,8 +238,32 @@ def commandDirect(event, msg):
     elif msg == 'Добавить домашнее задание':
         addHomework_flag = True
         add_homework()
+    elif msg == 'Указать число':
+        if addHomework_flag == True:
+            setDate()
+    elif msg == 'Отмена':
+        if addHomework_flag == True:
+            addHomework.clearStack()
+            step_code = 0
+            addHomework_flag = False
+            mainMenu(event)
     elif msg == 'О боте':
         AboutText()
+    else:
+        if addHomework_flag == True:
+            if step_code == 0:
+                addHomework.setDate(msg)
+                step_code = step_code + 1
+                setLesson()
+            elif step_code == 1:
+                addHomework.setLesson(msg)
+                step_code = step_code + 1
+                setTask()
+            elif step_code == 2:
+                addHomework.setTask(msg)
+                step_code = 0
+                setHomework()
+                addHomework_flag = False
 
 
 if __name__ == '__main__':

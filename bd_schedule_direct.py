@@ -25,13 +25,9 @@ class scheduleDirect:
             self.cursor.execute("SELECT * FROM `admins`")
             return self.cursor.fetchall()
 
-            
-
-    def add_paymentToStack(self, user_id, code):
-        """Добавляем"""
+    def add_Homework(self, date, weekDay, lesson, task):
         with self.connection:
-            return self.cursor.execute("INSERT INTO `payments` (`user_id`, 'code') VALUES(?,?)",
-                                         (user_id, code))
+            return self.cursor.execute("INSERT INTO `homework` (`compl_date`, 'weekday', 'lesson', 'task') VALUES(?,?,?,?)", (date, weekDay, lesson, task))
 
     def delete_payment(self, user_id):
         with self.connection:
