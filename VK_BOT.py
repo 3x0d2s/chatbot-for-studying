@@ -82,13 +82,17 @@ def ShowWeekdays():
 
 
 def AboutText():
-    write_msg(event.user_id,
-              'Бот разработан Максимом Ждановым - vk.com/exodus_outcome')
+    msg = 'Бот разработан Максимом Ждановым - vk.com/exodus_outcome'
+    keyboard = VkKeyboard(one_time=True)
+    keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def ScheduleOrHomework():
+def ScheduleOrHomework(msg):
     global homework_flag
     global schedule_flag
+    global addHomework_flag
+    global step_code
     #
     if schedule_flag == True:
         schedule(msg)
@@ -96,6 +100,10 @@ def ScheduleOrHomework():
     elif homework_flag == True:
         homework(msg)
         homework_flag = False
+    elif addHomework_flag == True:
+        addHomework.setWeekday(msg)
+        step_code = step_code + 1
+        setLesson()
 
 
 def schedule(weekday):
@@ -156,12 +164,14 @@ def editing():
 
 def add_homework():
     keyboard = VkKeyboard(one_time=True)
-    # keyboard.add_button('Выбрать день недели',
-    #                    color=VkKeyboardColor.SECONDARY)
     keyboard.add_button('Указать число',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
+    keyboard.add_button('Указать день недели',
+                        color=VkKeyboardColor.SECONDARY)
+    keyboard.add_line()
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
+    #
     msg = 'Выберите вариант указания даты сдачи домашнего задания.'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
@@ -169,6 +179,7 @@ def add_homework():
 def setDate():
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
+    #
     msg = 'Напишите число в формате (День).(Месяц).(Год). Например 03.11.2018'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
@@ -176,6 +187,7 @@ def setDate():
 def setLesson():
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
+    #
     msg = 'Напишите название урока'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
@@ -183,6 +195,7 @@ def setLesson():
 def setTask():
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
+    #
     msg = 'Напишите все задачи'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
@@ -221,26 +234,32 @@ def commandDirect(event, msg):
         homework_flag = True
         ShowWeekdays()
     elif msg == 'Понедельник':
-        ScheduleOrHomework()
+        ScheduleOrHomework(msg)
     elif msg == 'Вторник':
-        ScheduleOrHomework()
+        ScheduleOrHomework(msg)
     elif msg == 'Среда ':
-        ScheduleOrHomework()
+        ScheduleOrHomework(msg)
     elif msg == 'Четверг':
-        ScheduleOrHomework()
+        ScheduleOrHomework(msg)
     elif msg == 'Пятница':
-        ScheduleOrHomework()
+        ScheduleOrHomework(msg)
     elif msg == 'Суббота':
-        ScheduleOrHomework()
+        ScheduleOrHomework(msg)
     elif msg == 'Редактирование':
         if userIsAdmin(event) == True:
             editing()
     elif msg == 'Добавить домашнее задание':
-        addHomework_flag = True
-        add_homework()
+        if userIsAdmin(event) == True:
+            addHomework_flag = True
+            add_homework()
     elif msg == 'Указать число':
-        if addHomework_flag == True:
-            setDate()
+        if userIsAdmin(event) == True:
+            if addHomework_flag == True:
+                setDate()
+    elif msg == 'Указать день недели':
+        if userIsAdmin(event) == True:
+            if addHomework_flag == True:
+                ShowWeekdays()
     elif msg == 'Отмена':
         if addHomework_flag == True:
             addHomework.clearStack()

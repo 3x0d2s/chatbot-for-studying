@@ -29,6 +29,7 @@ class scheduleDirect:
         with self.connection:
             return self.cursor.execute("INSERT INTO `homework` (`compl_date`, 'weekday', 'lesson', 'task') VALUES(?,?,?,?)", (date, weekDay, lesson, task))
 
+
     def delete_payment(self, user_id):
         with self.connection:
             self.cursor.execute(
