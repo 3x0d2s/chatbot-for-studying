@@ -1,7 +1,7 @@
 import sqlite3
 
 
-class scheduleDirect:
+class bdDirect:
 
     def __init__(self, database):
         """Подключаемся к БД и сохраняем курсор соединения"""
@@ -29,11 +29,9 @@ class scheduleDirect:
         with self.connection:
             return self.cursor.execute("INSERT INTO `homework` (`compl_date`, 'weekday', 'lesson', 'task') VALUES(?,?,?,?)", (date, weekDay, lesson, task))
 
-
-    def delete_payment(self, user_id):
+    def del_Homework(self, date, lesson):
         with self.connection:
-            self.cursor.execute(
-                "DELETE FROM `payments` WHERE `user_id` = ?", (user_id,))
+            return self.cursor.execute("DELETE FROM `homework` WHERE compl_date=? AND lesson=?", (date, lesson))
 
     def close(self):
         """Закрываем соединение с БД"""

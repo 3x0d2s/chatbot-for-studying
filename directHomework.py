@@ -2,18 +2,18 @@ import datetime
 #
 
 
-class addHomework:
+class Homework:
 
     def setWeekday(self, value=None):
-        if not value == None:
-            self.weekday = value
-            self.getDateByWeekday(value)
-        else:
+        if value == None:
             idWeekday = datetime.datetime.strptime(
                 self.date, '%d.%m.%Y').weekday()
             weekdays = ['Понедельник', 'Вторник', 'Среда',
                         'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
             self.weekday = weekdays[idWeekday]
+        else:
+            self.weekday = value
+            self.getDateByWeekday(value)
 
     def getWeekday(self):
         return self.weekday
@@ -63,7 +63,7 @@ class addHomework:
         return self.task
 
     def clearStack(self):
-        self.setDate(None)
-        self.setWeekday(None)
-        self.setLesson(None)
-        self.setTask(None)
+        self.date = None
+        self.weekday = None
+        self.lesson = None
+        self.task = None
