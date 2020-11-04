@@ -6,12 +6,13 @@ from vk_api.utils import get_random_id
 from bd_direct import bdDirect
 from directHomework import Homework
 import config
+import datetime
 #
 vk_session = vk_api.VkApi(token=config.token)
 session_api = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
 #
-addHomework_flag = False
+Homework_flag = False
 schedule_flag = False
 addHomework_flag = False
 delHomework_flag = False
@@ -67,7 +68,13 @@ def getAdminList():
 
 
 def ShowWeekdays():
+    global Homework_flag
+    #
     keyboard = VkKeyboard(one_time=True)
+    if schedule_flag == True or Homework_flag == True:
+        keyboard.add_button('На сегодня', color=VkKeyboardColor.POSITIVE)
+        keyboard.add_button('На завтра', color=VkKeyboardColor.POSITIVE)
+        keyboard.add_line()
     keyboard.add_button('Понедельник', color=VkKeyboardColor.SECONDARY)
     keyboard.add_button('Вторник', color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
@@ -83,28 +90,40 @@ def ShowWeekdays():
 
 
 def AboutText():
-    msg = 'Бот разработан Максимом Ждановым - vk.com/exodus_outcome'
+    msg = 'Бот разработан @exodus_outcome (Максимом Ждановым)'
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def ScheduleOrHomework(msg):
+def ScheduleOrOperHomework(msg):
     global addHomework_flag
     global schedule_flag
-    global addHomework_flag
+    global Homework_flag
+    global delHomework_flag
     global step_code
     #
     if schedule_flag == True:
         schedule(msg)
         schedule_flag = False
-    elif addHomework_flag == True:
+    elif Homework_flag == True:
         homework(msg)
-        addHomework_flag = False
-    elif delHomework_flag == True:
+        Homework_flag = False
+    elif addHomework_flag == True or delHomework_flag == True:
         Homework.setWeekday(msg)
         step_code = step_code + 1
         setLesson()
+
+
+def Accusative(weekday):
+    if weekday == 'Среда':
+        return 'Среду'
+    if weekday == 'Пятница':
+        return 'Пятницу'
+    if weekday == 'Суббота':
+        return 'Субботу'
+    else:
+        return weekday
 
 
 def schedule(weekday):
@@ -120,11 +139,11 @@ def schedule(weekday):
         end_time = lesson[row][3]
         lesson_name = lesson[row][4]
         cabinet = lesson[row][5]
-        msg = str(str(row + 1) + ') ' + lesson_name + ' ' +
-                  start_time + '-' + end_time + ' | ' + str(cabinet) + ' кабинет')
+        msg = str('🔹 ' + start_time + '-' + end_time +
+                  ' ' + lesson_name + ' 📚 ' + str(cabinet))
         listLessons.append(msg)
         row = row + 1
-    msg = 'Расписание уроков на ' + weekday + ':'
+    msg = '📝 Расписание уроков на ' + Accusative(weekday) + ':'
     for row in listLessons:
         msg = msg + '\n' + row
     keyboard = VkKeyboard(one_time=True)
@@ -137,21 +156,28 @@ def homework(weekday):
     homework_tasks = db.get_Homework(weekday)
     db.close()
     #
-    listHomework = []
     rowcount = len(homework_tasks)
-    row = 0
-    while row < rowcount:
-        lesson_name = homework_tasks[row][0]
-        task = homework_tasks[row][1]
-        msg = str(str(row + 1) + ') ' + lesson_name + ' - ' + task)
-        listHomework.append(msg)
-        row = row + 1
-    msg = 'Домашнее задание на ' + weekday + ':'
-    for row in listHomework:
-        msg = msg + '\n' + row
-    keyboard = VkKeyboard(one_time=True)
-    keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
-    write_msg_withKeyboard(event.user_id, msg, keyboard)
+    #
+    if rowcount > 0:
+        listHomework = []
+        row = 0
+        while row < rowcount:
+            lesson_name = homework_tasks[row][0]
+            task = homework_tasks[row][1]
+            msg = str('♦ ' + lesson_name + ' - ' + task)
+            listHomework.append(msg)
+            row = row + 1
+        msg = 'Домашнее задание на ' + Accusative(weekday) + ':'
+        for rows in listHomework:
+            msg = msg + '\n' + rows
+        keyboard = VkKeyboard(one_time=True)
+        keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+        write_msg_withKeyboard(event.user_id, msg, keyboard)
+    else:
+        keyboard = VkKeyboard(one_time=True)
+        keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+        msg = 'Домашнего задания на ' + Accusative(weekday) + ' нет!'
+        write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
 def editing():
@@ -185,9 +211,6 @@ def del_homework():
     keyboard.add_button('Указать число',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
-    keyboard.add_button('Указать день недели',
-                        color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
     #
     msg = 'Выберите вариант указания даты для домашнего задания, которое хотите удалить'
@@ -197,7 +220,6 @@ def del_homework():
 def setDate():
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
-    #
     msg = 'Напишите число в формате (День).(Месяц).(Год). Например 03.11.2018'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
@@ -205,7 +227,6 @@ def setDate():
 def setLesson():
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
-    #
     msg = 'Напишите название урока'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
@@ -213,7 +234,6 @@ def setLesson():
 def setTask():
     keyboard = VkKeyboard(one_time=True)
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
-    #
     msg = 'Напишите все задачи'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
@@ -249,7 +269,7 @@ def delHomework():
 
 
 def commandDirect(event, msg):
-    global addHomework_flag
+    global Homework_flag
     global schedule_flag
     global addHomework_flag
     global delHomework_flag
@@ -264,20 +284,44 @@ def commandDirect(event, msg):
         schedule_flag = True
         ShowWeekdays()
     elif msg == 'Домашнее задание':
-        addHomework_flag = True
+        Homework_flag = True
         ShowWeekdays()
+    #
+    elif msg == 'На сегодня' or msg == 'На завтра':
+        if schedule_flag == True or Homework_flag == True:
+            now = datetime.datetime.now()
+            idWeekday = now.weekday()
+            weekdays = ['Понедельник', 'Вторник', 'Среда',
+                        'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+            if schedule_flag == True:
+                ##
+                schedule_flag = False
+                if msg == 'На сегодня':
+                    schedule(weekdays[idWeekday])
+                elif msg == 'На завтра':
+                    schedule(weekdays[idWeekday + 1])
+                ##
+            elif Homework_flag == True:
+                ##
+                Homework_flag = False
+                if msg == 'На сегодня':
+                    homework(weekdays[idWeekday])
+                elif msg == 'На завтра':
+                    homework(weekdays[idWeekday + 1])
+                ##
+    #
     elif msg == 'Понедельник':
-        ScheduleOrHomework(msg)
+        ScheduleOrOperHomework(msg)
     elif msg == 'Вторник':
-        ScheduleOrHomework(msg)
-    elif msg == 'Среда ':
-        ScheduleOrHomework(msg)
+        ScheduleOrOperHomework(msg)
+    elif msg == 'Среда':
+        ScheduleOrOperHomework(msg)
     elif msg == 'Четверг':
-        ScheduleOrHomework(msg)
+        ScheduleOrOperHomework(msg)
     elif msg == 'Пятница':
-        ScheduleOrHomework(msg)
+        ScheduleOrOperHomework(msg)
     elif msg == 'Суббота':
-        ScheduleOrHomework(msg)
+        ScheduleOrOperHomework(msg)
     elif msg == 'Редактирование':
         if userIsAdmin(event) == True:
             editing()
@@ -299,8 +343,7 @@ def commandDirect(event, msg):
         if userIsAdmin(event) == True:
             if addHomework_flag == True:
                 ShowWeekdays()
-            if delHomework_flag == True:
-                ShowWeekdays()
+    #
     elif msg == 'Отмена':
         if addHomework_flag == True or delHomework_flag == True:
             Homework.clearStack()
@@ -308,6 +351,7 @@ def commandDirect(event, msg):
             addHomework_flag = False
             delHomework_flag = False
             mainMenu(event)
+    #
     elif msg == 'О боте':
         AboutText()
     else:
