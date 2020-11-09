@@ -20,6 +20,12 @@ class bdDirect:
                 "SELECT lesson, task FROM `homework` WHERE weekday IN (?)", (weekday, ))
             return self.cursor.fetchall()
 
+    def get_allHomework(self):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT compl_date, lesson FROM `homework`")
+            return self.cursor.fetchall()
+
     def get_admins(self):
         with self.connection:
             self.cursor.execute("SELECT * FROM `admins`")

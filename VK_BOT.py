@@ -211,10 +211,30 @@ def del_homework():
     keyboard.add_button('Указать число',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
+    keyboard.add_button('Удалить старое ДЗ', color=VkKeyboardColor.POSITIVE)
+    keyboard.add_line()
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
     #
     msg = 'Выберите вариант указания даты для домашнего задания, которое хотите удалить'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
+
+
+def clearOldHomework():
+    db = bdDirect('Data Base/db.db')
+    allHomework = db.get_allHomework()
+    #
+    rowcount = len(allHomework)
+
+    if rowcount > 0:
+        now = datetime.datetime.now().replace(
+            hour=0, second=0, microsecond=0, minute=0)
+        for row in range(0, rowcount):
+            date = allHomework[row][0]
+            homew_date = datetime.datetime.strptime(
+                date, '%d.%m.%Y')
+            if now > homew_date:
+                lesson = allHomework[row][1]
+                db.del_Homework(date, lesson)
 
 
 def setDate():
@@ -339,6 +359,12 @@ def commandDirect(event, msg):
                 setDate()
             if delHomework_flag == True:
                 setDate()
+
+    elif msg == 'Удалить старое ДЗ':
+        if userIsAdmin(event) == True:
+            if delHomework_flag == True:
+                clearOldHomework()
+
     elif msg == 'Указать день недели':
         if userIsAdmin(event) == True:
             if addHomework_flag == True:
