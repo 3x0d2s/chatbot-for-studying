@@ -39,6 +39,15 @@ class bdDirect:
         with self.connection:
             return self.cursor.execute("DELETE FROM `homework` WHERE compl_date=? AND lesson=?", (date, lesson))
 
+    def check_Homework(self, date, lesson):
+        with self.connection:
+            homework = self.cursor.execute(
+                "DELETE FROM `homework` WHERE compl_date=? AND lesson=?", (date, lesson))
+            if homework.rowcount != 0:
+                return True
+            else:
+                return False
+
     def close(self):
         """Закрываем соединение с БД"""
         self.connection.close()
