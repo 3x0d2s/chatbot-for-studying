@@ -225,6 +225,34 @@ def homework(weekday=None, mode=0):
     write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
 
 
+def OperTodayTomorrow():
+    global schedule_flag
+    global Homework_flag
+    #
+    if schedule_flag == True or Homework_flag == True:
+        idWeekday = datetime.datetime.now().weekday()
+        weekdays = ['Понедельник', 'Вторник', 'Среда',
+                    'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+        if schedule_flag == True:
+            schedule_flag = False
+            if msg == 'На сегодня':
+                schedule(weekdays[idWeekday])
+            elif msg == 'На завтра':
+                if idWeekday == 6:
+                    '''  Самый большой костыль этого кода здесь :) '''
+                    idWeekday = -1
+                schedule(weekdays[idWeekday + 1])
+        elif Homework_flag == True:
+            Homework_flag = False
+            if msg == 'На сегодня':
+                homework(weekdays[idWeekday], 1)
+            elif msg == 'На завтра':
+                if idWeekday == 6:
+                    '''  Обманул, еще здесь костыль :) '''
+                    idWeekday = -1
+                homework(weekdays[idWeekday + 1], 2)
+
+
 def OperWithDelOrAddHomework(msg):
     global addHomework_flag
     global delHomework_flag
@@ -426,31 +454,8 @@ def commandDirect(event, msg):
     elif msg == 'Домашнее задание':
         Homework_flag = True
         ShowWeekdays()
-    #
     elif msg == 'На сегодня' or msg == 'На завтра':
-        if schedule_flag == True or Homework_flag == True:
-            idWeekday = datetime.datetime.now().weekday()
-            weekdays = ['Понедельник', 'Вторник', 'Среда',
-                        'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
-            if schedule_flag == True:
-                schedule_flag = False
-                if msg == 'На сегодня':
-                    schedule(weekdays[idWeekday])
-                elif msg == 'На завтра':
-                    if idWeekday == 6:
-                        '''  Самый большой костыль этого кода здесь :) '''
-                        idWeekday = -1
-                    schedule(weekdays[idWeekday + 1])
-            elif Homework_flag == True:
-                Homework_flag = False
-                if msg == 'На сегодня':
-                    homework(weekdays[idWeekday], 1)
-                elif msg == 'На завтра':
-                    if idWeekday == 6:
-                        '''  Обманул, еще здесь костыль :) '''
-                        idWeekday = -1
-                    homework(weekdays[idWeekday + 1], 2)
-    #
+        OperTodayTomorrow()
     elif (msg == 'Понедельник' or msg == 'Вторник' or msg == 'Среда'
           or msg == 'Четверг' or msg == 'Пятница' or msg == 'Суббота'):
         ScheduleOrOperHomework(msg)
