@@ -34,7 +34,7 @@ def write_msg_withKeyboard(user_id, message, keyboard):
         message), 'random_id': 0, 'keyboard': keyboard.get_keyboard()})
 
 
-def mainMenuKeyboard(event, onetime=True):
+def mainMenuKeyboard(event, onetime=False):
     keyboard = VkKeyboard(one_time=onetime)
     keyboard.add_button('Расписание', color=VkKeyboardColor.POSITIVE)
     keyboard.add_button('Домашнее задание', color=VkKeyboardColor.POSITIVE)
@@ -80,7 +80,7 @@ def ShowWeekdays():
     else:
         msg = 'Выберите день недели или укажите дату...'
     #
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     if schedule_flag == True or Homework_flag == True:
         if Homework_flag == True:
             keyboard.add_button(
@@ -165,7 +165,7 @@ def schedule(weekday):
     write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
 
 
-def homework(weekday=None):
+def homework(weekday=None, mode=0):
     global Homework_flag
     if weekday != None:
         Homework.getDateByWeekday(weekday)
@@ -193,15 +193,29 @@ def homework(weekday=None):
             for rows in listHomework:
                 msg = msg + '\n' + rows
         else:
-            '''if weekday == 'Понедельник' or weekday == 'Вторник' or weekday == 'Четверг':
-                msg = 'Домашнего задания на ближайший ' + \
-                    Accusative(weekday).lower() + ' нет.'
-            else:
-                msg = 'Домашнего задания на ближайшую ' + \
-                    Accusative(weekday).lower() + ' нет.'''
+            if mode == 0:
+                if weekday == 'Понедельник' or weekday == 'Вторник' or weekday == 'Четверг':
+                    msg = 'На ближайший ' + weekday.lower() + ' нет домашнего задания.'
+                else:
+                    msg = 'На ближайшую ' + \
+                        Accusative(weekday).lower() + ' нет домашнего задания.'
             #
-            msg = 'Домашнего задания на ' + \
-                Accusative(weekday).lower() + ' (' + date + ')' + ' нет.'
+            elif mode == 1:
+                msg = 'На сегодня нет домашнего задания.'
+            #
+            elif mode == 2:
+                msg = 'На завтра нет домашнего задания.'
+            #
+            elif mode == 3:
+                if weekday == 'Понедельник' or weekday == 'Вторник' or weekday == 'Четверг':
+                    msg = 'На ' + \
+                        Accusative(weekday).lower() + ' ' + \
+                        date + ' нет домашнего задания.'
+                else:
+                    msg = 'На ' + \
+                        Accusative(weekday).lower() + ' ' + \
+                        date + ' нет домашнего задания.'
+            #
     elif weekday == 'Воскресенье':
         msg = 'Домашнее задание на воскресенье? Совсем переучились? Отдыхайте, неблагополучные!'
     #
@@ -222,7 +236,7 @@ def OperWithDelOrAddHomework(msg):
             if check_Date(msg) == True:
                 Homework.setDate(msg)
                 if Homework_flag == True:
-                    homework()
+                    homework(None, 3)
                 else:
                     step_code = step_code + 1
                     setLesson()
@@ -261,7 +275,7 @@ def OperWithDelOrAddHomework(msg):
 
 
 def editing():
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Добавить домашнее задание',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
@@ -273,7 +287,7 @@ def editing():
 
 
 def add_homework():
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Указать число',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
@@ -286,7 +300,7 @@ def add_homework():
 
 
 def del_homework():
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Указать число',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
@@ -316,7 +330,7 @@ def clearOldHomework():
                 counter += 1
     #
     db.close()
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
     if counter > 0:
         msg = 'Всё старое домашнее задание было удалено.'
@@ -326,21 +340,21 @@ def clearOldHomework():
 
 
 def setDate():
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Напишите число в формате (День).(Месяц).(Год). Например 03.11.2018'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
 def setLesson():
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Напишите название урока...'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
 def setTask():
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Напишите все задачи...'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
@@ -351,7 +365,7 @@ def setHomework():
     weekDay = Homework.getWeekday()
     lesson = Homework.getLesson()
     task = Homework.getTask()
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     #
     db = bdDirect('Data Base/db.db')
     db.add_Homework(date, weekDay, lesson, task)
@@ -369,7 +383,7 @@ def setHomework():
 def delHomework():
     date = Homework.getDate()
     lesson = Homework.getLesson()
-    keyboard = VkKeyboard(one_time=True)
+    keyboard = VkKeyboard(one_time=False)
     #
     db = bdDirect('Data Base/db.db')
     if db.check_Homework(date, lesson) == True:
@@ -430,12 +444,12 @@ def commandDirect(event, msg):
             elif Homework_flag == True:
                 Homework_flag = False
                 if msg == 'На сегодня':
-                    homework(weekdays[idWeekday])
+                    homework(weekdays[idWeekday], 1)
                 elif msg == 'На завтра':
                     if idWeekday == 6:
                         '''  Обманул, еще здесь костыль :) '''
                         idWeekday = -1
-                    homework(weekdays[idWeekday + 1])
+                    homework(weekdays[idWeekday + 1], 2)
     #
     elif (msg == 'Понедельник' or msg == 'Вторник' or msg == 'Среда'
           or msg == 'Четверг' or msg == 'Пятница' or msg == 'Суббота'):
