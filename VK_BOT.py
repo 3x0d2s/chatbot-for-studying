@@ -469,19 +469,16 @@ def commandDirect(event, msg):
         if Homework_flag or addHomework_flag == True or delHomework_flag == True:
             setDate()
     elif msg == 'Удалить старое ДЗ':
-        if userIsAdmin(event) == True:
-            if delHomework_flag == True:
-                clearOldHomework()
+        if delHomework_flag == True:
+            clearOldHomework()
     elif msg == 'Указать день недели':
-        if userIsAdmin(event) == True:
-            if addHomework_flag == True:
-                ShowWeekdays()
+        if addHomework_flag == True:
+            ShowWeekdays()
     elif msg == 'Отмена':
         if addHomework_flag == True or delHomework_flag == True:
-            Homework.clearStack()
             step_code = 0
-            addHomework_flag = False
-            delHomework_flag = False
+            Homework.clearStack()
+            addHomework_flag = delHomework_flag = False
             write_msg_withKeyboard(
                 event.user_id, 'Главное меню', mainMenuKeyboard(event))
     elif msg == 'О боте':
