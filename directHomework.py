@@ -29,7 +29,7 @@ class Homework:
         now = datetime.datetime.now()
         idThisWeekday = now.weekday()
         #
-        if idSecondWeekday <= idThisWeekday:
+        if idSecondWeekday < idThisWeekday:
             delt = (6 - idThisWeekday) + idSecondWeekday
             dur_days = datetime.timedelta(days=(delt + 1))
             result = now + dur_days
@@ -40,6 +40,9 @@ class Homework:
             dur_days = datetime.timedelta(days=delt)
             result = now + dur_days
             date = result.strftime('%d.%m.%Y')
+            self.setDate(date)
+        elif idSecondWeekday == idThisWeekday:
+            date = now.strftime('%d.%m.%Y')
             self.setDate(date)
 
     def setDate(self, Date):

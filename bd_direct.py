@@ -14,10 +14,10 @@ class bdDirect:
                 "SELECT * FROM `schedule` WHERE weekday IN (?)", (weekday, ))
             return self.cursor.fetchall()
 
-    def get_Homework(self, weekday):
+    def get_Homework(self, date):
         with self.connection:
             self.cursor.execute(
-                "SELECT lesson, task FROM `homework` WHERE weekday IN (?)", (weekday, ))
+                "SELECT lesson, task FROM `homework` WHERE compl_date IN (?)", (date, ))
             return self.cursor.fetchall()
 
     def get_allHomework(self):
@@ -42,8 +42,9 @@ class bdDirect:
     def check_Homework(self, date, lesson):
         with self.connection:
             homework = self.cursor.execute(
-                "DELETE FROM `homework` WHERE compl_date=? AND lesson=?", (date, lesson))
-            if homework.rowcount != 0:
+                "SELECT * FROM `homework` WHERE compl_date=? AND lesson=?", (date, lesson))
+            #G = len(homework)
+            if len(homework.fetchall()) != 0:
                 return True
             else:
                 return False
