@@ -6,6 +6,7 @@ from vk_api.utils import get_random_id
 #
 from bd_direct import bdDirect
 from directHomework import Homework
+from check_InputData import *
 import config
 import datetime
 #
@@ -160,10 +161,12 @@ def schedule(weekday):
             msg = msg + '\n' + row
     elif weekday == 'Воскресенье':
         msg = 'Уроки в воскресенье? Всё нормально? Лучше поспи, отдохни, хорошо покушай.'
+
     write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
 
 
 def homework(weekday=None):
+    global Homework_flag
     if weekday != None:
         Homework.getDateByWeekday(weekday)
     else:
@@ -196,43 +199,65 @@ def homework(weekday=None):
             else:
                 msg = 'Домашнего задания на ближайшую ' + \
                     Accusative(weekday).lower() + ' нет.'''
+            #
             msg = 'Домашнего задания на ' + \
                 Accusative(weekday).lower() + ' (' + date + ')' + ' нет.'
     elif weekday == 'Воскресенье':
         msg = 'Домашнее задание на воскресенье? Совсем переучились? Отдыхайте, неблагополучные!'
+    #
+    Homework.clearStack()
+    Homework_flag = False
+    #
     write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
 
 
-def OperWithDelOrAddHomework():
+def OperWithDelOrAddHomework(msg):
     global addHomework_flag
     global delHomework_flag
     global Homework_flag
     global step_code
     #
     if addHomework_flag == True or delHomework_flag == True or Homework_flag == True:
-        if step_code == 0:
-            Homework.setDate(msg)
-            if Homework_flag == True:
-                homework()
+        if step_code == 0:  # Date
+            if check_Date(msg) == True:
+                Homework.setDate(msg)
+                if Homework_flag == True:
+                    homework()
+                else:
+                    step_code = step_code + 1
+                    setLesson()
             else:
-                step_code = step_code + 1
+                msg = 'Ошибка даты: неверный формат.'
+                write_msg(event.user_id, msg)
+                setDate()
+        #
+        elif step_code == 1:  # Lesson
+            if check_Lesson(msg) == True:
+                Homework.setLesson(msg)
+                if addHomework_flag == True:
+                    step_code = step_code + 1
+                    setTask()
+                elif delHomework_flag == True:
+                    step_code = 0
+                    delHomework_flag = False
+                    delHomework()
+                    Homework.clearStack()
+            else:
+                msg = 'Ошибка названия урока: длина не может превышать 16 символов.'
+                write_msg(event.user_id, msg)
                 setLesson()
-        elif step_code == 1:
-            Homework.setLesson(msg)
-            if addHomework_flag == True:
-                step_code = step_code + 1
-                setTask()
-            elif delHomework_flag == True:
+        #
+        elif step_code == 2:  # Task
+            if check_Tasks(msg) == True:
+                Homework.setTask(msg)
                 step_code = 0
-                delHomework_flag = False
-                delHomework()
+                addHomework_flag = False
+                setHomework()
                 Homework.clearStack()
-        elif step_code == 2:
-            Homework.setTask(msg)
-            step_code = 0
-            addHomework_flag = False
-            setHomework()
-            Homework.clearStack()
+            else:
+                msg = 'Ошибка задач: длина не может превышать 128 символов.'
+                write_msg(event.user_id, msg)
+                setTask()
 
 
 def editing():
@@ -376,6 +401,9 @@ def commandDirect(event, msg):
         if schedule_flag == True or Homework_flag == True or addHomework_flag == True or delHomework_flag == True:
             schedule_flag = Homework_flag = addHomework_flag = delHomework_flag = False
         #
+        if addHomework_flag == True or delHomework_flag == True:
+            Homework.clearStack()
+        #
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', mainMenuKeyboard(event))
     elif msg == 'Расписание':
@@ -440,11 +468,12 @@ def commandDirect(event, msg):
             step_code = 0
             addHomework_flag = False
             delHomework_flag = False
-            mainMenu(event)
+            write_msg_withKeyboard(
+                event.user_id, 'Главное меню', mainMenuKeyboard(event))
     elif msg == 'О боте':
         AboutText()
     else:
-        OperWithDelOrAddHomework()
+        OperWithDelOrAddHomework(msg)
 
 
 if __name__ == '__main__':
