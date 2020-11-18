@@ -43,7 +43,6 @@ class bdDirect:
         with self.connection:
             homework = self.cursor.execute(
                 "SELECT * FROM `homework` WHERE compl_date=? AND lesson=?", (date, lesson))
-            #G = len(homework)
             if len(homework.fetchall()) != 0:
                 return True
             else:
