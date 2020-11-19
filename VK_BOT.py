@@ -476,5 +476,5 @@ if __name__ == '__main__':
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:
                 msg = event.text
-                #print(event.user_id, ' - ', msg)
+                print(event.user_id, ' - ', msg)
                 commandDirect(event, msg)
