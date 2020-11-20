@@ -26,7 +26,7 @@ step_code = 0
 
 def AboutText():
     msg = 'Бот представляет собой автоматизированное решение проблемы незнания домашнего задания\
-            или расписания, среди учеников.\nРазработчик - @exodus_outcome (Максим Жданов)'
+            или расписания среди учеников.\nРазработчик - @3x0d2s (Максим Жданов)'
     write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
 
 
@@ -417,7 +417,7 @@ def commandDirect(event, msg):
     global step_code
     global Homework
     #
-    if msg == 'Start':
+    if msg == 'Start' or msg == 'Начать':
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', mainMenuKeyboard(event))
     elif msg == 'В главное меню':
