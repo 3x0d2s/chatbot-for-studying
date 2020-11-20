@@ -463,8 +463,8 @@ def commandDirect(event, msg):
             step_code = 0
             Homework.clearStack()
             addHomework_flag = delHomework_flag = False
-            write_msg_withKeyboard(
-                event.user_id, 'Главное меню', mainMenuKeyboard(event))
+        write_msg_withKeyboard(
+            event.user_id, 'Главное меню', mainMenuKeyboard(event))
     elif msg == 'О боте':
         AboutText()
     else:
