@@ -25,7 +25,7 @@ step_code = 0
 
 
 def AboutText():
-    msg = 'Бот представляет собой автоматизированное решение проблемы незнания домашнего задания\
+    msg = 'Бот представляет собой автоматизированное решение проблемы незнания домашнего задания \
             или расписания среди учеников.\nРазработчик - @3x0d2s (Максим Жданов)'
     write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
 
@@ -476,5 +476,4 @@ if __name__ == '__main__':
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:
                 msg = event.text
-                print(event.user_id, ' - ', msg)
                 commandDirect(event, msg)
