@@ -24,12 +24,6 @@ step_code = 0
 #
 
 
-def AboutText():
-    msg = 'Бот представляет собой автоматизированное решение проблемы незнания домашнего задания \
-            или расписания среди учеников.\nРазработчик - @3x0d2s (Максим Жданов)'
-    write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
-
-
 def write_msg(user_id, message):
     vk_session.method('messages.send', {
                       'user_id': user_id, 'message': str(message), 'random_id': 0})
@@ -48,8 +42,6 @@ def mainMenuKeyboard(event):
         keyboard.add_line()
         keyboard.add_button(
             'Редактирование', color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
-    keyboard.add_button('О боте', color=VkKeyboardColor.SECONDARY)
     return keyboard
 
 
@@ -465,8 +457,6 @@ def commandDirect(event, msg):
             addHomework_flag = delHomework_flag = False
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', mainMenuKeyboard(event))
-    elif msg == 'О боте':
-        AboutText()
     else:
         OperWithDelOrAddHomework(msg)
 
