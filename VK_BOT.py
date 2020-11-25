@@ -438,6 +438,7 @@ def setHomework():
                             color=VkKeyboardColor.SECONDARY)
         keyboard.add_line()
         keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+        write_msg_withKeyboard(event.user_id, msg, keyboard)
     db.close()
 
 
