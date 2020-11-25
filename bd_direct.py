@@ -14,6 +14,12 @@ class bdDirect:
                 "SELECT * FROM `schedule` WHERE weekday IN (?)", (weekday, ))
             return self.cursor.fetchall()
 
+    def get_allLesson(self):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT weekday, lesson_name FROM `schedule`")
+            return self.cursor.fetchall()
+
     def get_Homework(self, date):
         with self.connection:
             self.cursor.execute(
