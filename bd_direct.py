@@ -7,6 +7,80 @@ class bdDirect:
         """Подключаемся к БД и сохраняем курсор соединения"""
         self.connection = sqlite3.connect(database, check_same_thread=False)
         self.cursor = self.connection.cursor()
+####
+
+    def getUser(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT * FROM `users` WHERE user_id=?", (user_id,))
+            return self.cursor.fetchall()
+
+    def getUserHomewFlag(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT homework_f FROM users WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def getUserSchedFlag(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT schedule_f FROM users WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def getUserAddHomewFlag(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT addHomew_f FROM users WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def getUserDelHomewFlag(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT delHome_f FROM users WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def getUserGetLessDateFlag(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT getLessDate_f FROM users WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def getUserStepCode(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT step_code FROM users WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def changeUserHomewFlag(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE users SET homework_f=? WHERE user_id=?", (value, user_id))
+
+    def changeUserSchedFlag(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE users SET schedule_f=? WHERE user_id=?", (value, user_id))
+
+    def changeUserAddHomewFlag(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE users SET addHomew_f=? WHERE user_id=?", (value, user_id))
+
+    def changeUserDelHomewFlag(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE users SET delHome_f=? WHERE user_id=?", (value, user_id))
+
+    def changeUserGetLessDateFlag(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE users SET getLessDate_f=? WHERE user_id=?", (value, user_id))
+
+    def changeUserStepCode(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE users SET step_code=? WHERE user_id=?", (value, user_id))
+####
 
     def get_Lesson(self, weekday):
         with self.connection:
@@ -32,9 +106,18 @@ class bdDirect:
                 "SELECT compl_date, lesson FROM `homework`")
             return self.cursor.fetchall()
 
+    def add_user(self, user_id):
+        with self.connection:
+            return self.cursor.execute("INSERT INTO `users` (`user_id`) VALUES(?) ", (user_id,))
+
     def get_admins(self):
         with self.connection:
             self.cursor.execute("SELECT * FROM `admins`")
+            return self.cursor.fetchall()
+
+    def get_users(self):
+        with self.connection:
+            self.cursor.execute("SELECT * FROM `users`")
             return self.cursor.fetchall()
 
     def add_Homework(self, date, weekDay, lesson, task):

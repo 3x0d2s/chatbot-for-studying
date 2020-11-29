@@ -10,7 +10,7 @@ def check_Date(date):  # Проверка даты на корректность
 
 
 def check_Lesson(lesson):  # Проверка имени урока на корректность
-    if len(lesson) <= 16:
+    if len(lesson) <= 32:
         return True
     else:
         return False
