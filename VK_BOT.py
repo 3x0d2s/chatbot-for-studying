@@ -329,6 +329,7 @@ def OperWithDelOrAddHomework(event, msg):
                         Homework.clearStack()
                     elif getLessonDate_flag == True:
                         msg = getDateByLesson(msg)
+                        db.changeUserStepCode(event.user_id, 0)
                         db.changeUserGetLessDateFlag(event.user_id, False)
                         write_msg_withKeyboard(
                             event.user_id, msg, editingKeyboard())
