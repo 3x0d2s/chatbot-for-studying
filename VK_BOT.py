@@ -175,17 +175,21 @@ def schedule(weekday):
     write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
 
 
-def homework(event, weekday=None, mode=0):
+def homework(event, weekday=None, mode=0, today=False):
+    db = bdDirect('Data Base/db.db')
     if weekday != None:
-        Homework.getDateByWeekday(weekday)
+        if today == True:
+            now = datetime.datetime.now().strftime('%d.%m.%Y')
+            Homework.setDate(str(now))
+        else:
+            Homework.getDateByWeekday(weekday)
     else:
         Homework.setWeekday()
         weekday = Homework.getWeekday()
+    #
     date = Homework.getDate()
     if weekday != 'Воскресенье':
-        db = bdDirect('Data Base/db.db')
         homework_tasks = db.get_Homework(date)
-        db.close()
         rowcount = len(homework_tasks)
         if rowcount > 0:
             listHomework = []
@@ -219,9 +223,8 @@ def homework(event, weekday=None, mode=0):
                         Accusative(weekday).lower() + ' ' + \
                         date + ' нет домашнего задания.'
     elif weekday == 'Воскресенье':
-        msg = 'Домашнее задание на воскресенье? Совсем переучились? Отдыхайте, неблагополучные!'
+        msg = 'Домашнее задание на воскресенье? Совсем переучились?'
     Homework.clearStack()
-    db = bdDirect('Data Base/db.db')
     db.changeUserHomewFlag(event.user_id, False)
     db.close()
     write_msg_withKeyboard(event.user_id, msg, mainMenuKeyboard(event))
@@ -248,7 +251,7 @@ def OperTodayTomorrow(event):
         elif Homework_flag == True:
             db.changeUserHomewFlag(event.user_id, False)
             if msg == 'На сегодня':
-                homework(event, weekdays[idWeekday], 1)
+                homework(event, weekdays[idWeekday], 1, True)
             elif msg == 'На завтра':
                 if idWeekday == 6:
                     '''  Обманул, еще здесь костыль :) '''
