@@ -17,7 +17,7 @@ def check_Lesson(lesson):  # Проверка имени урока на кор�
 
 
 def check_Tasks(task):  # Проверка имени урока на корректность
-    if len(task) <= 256:
+    if len(task) <= 512:
         return True
     else:
         return False

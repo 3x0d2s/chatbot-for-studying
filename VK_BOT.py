@@ -346,7 +346,7 @@ def OperWithDelOrAddHomework(event, msg):
                     setHomework()
                     Homework.clearStack()
                 else:
-                    msg = 'Ошибка задач: длина не может превышать 128 символов.'
+                    msg = 'Ошибка задач: длина не может превышать 512 символов.'
                     write_msg(event.user_id, msg)
                     setTask()
     else:
