@@ -7,7 +7,6 @@ class bdDirect:
         """Подключаемся к БД и сохраняем курсор соединения"""
         self.connection = sqlite3.connect(database, check_same_thread=False)
         self.cursor = self.connection.cursor()
-####
 
     def getUser(self, user_id):
         with self.connection:
@@ -80,7 +79,6 @@ class bdDirect:
         with self.connection:
             return self.cursor.execute(
                 "UPDATE users SET step_code=? WHERE user_id=?", (value, user_id))
-####
 
     def get_Lesson(self, weekday):
         with self.connection:

@@ -3,7 +3,7 @@ import datetime
 
 class Homework:
 
-    def setWeekday(self, value=None):
+    def Set_Weekday(self, value=None):
         if value == None:
             idWeekday = datetime.datetime.strptime(
                 self.date, '%d.%m.%Y').weekday()
@@ -12,12 +12,12 @@ class Homework:
             self.weekday = weekdays[idWeekday]
         else:
             self.weekday = value
-            self.getDateByWeekday(value)
+            self.Get_DateByWeekday(value)
 
-    def getWeekday(self):
+    def Get_Weekday(self):
         return self.weekday
 
-    def getDateByWeekday(self, weekday, mode=0):
+    def Get_DateByWeekday(self, weekday, mode=0):
         weekdays = ['Понедельник', 'Вторник', 'Среда',
                     'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
         idSecondWeekday = 0
@@ -30,12 +30,12 @@ class Homework:
         idThisWeekday = now.weekday()
         #
         if idSecondWeekday <= idThisWeekday:
-            delt = (6 - idThisWeekday) + idSecondWeekday # 2 - ср . 3 - чт 
+            delt = (6 - idThisWeekday) + idSecondWeekday  # 2 - ср . 3 - чт
             dur_days = datetime.timedelta(days=(delt + 1))
             result = now + dur_days
             date = result.strftime('%d.%m.%Y')
             if mode == 0:
-                self.setDate(date)
+                self.Set_Date(date)
             elif mode == 1:
                 return date
         elif idSecondWeekday > idThisWeekday:
@@ -44,30 +44,30 @@ class Homework:
             result = now + dur_days
             date = result.strftime('%d.%m.%Y')
             if mode == 0:
-                self.setDate(date)
+                self.Set_Date(date)
             elif mode == 1:
                 return date
 
-    def setDate(self, Date):
+    def Set_Date(self, Date):
         self.date = Date
-        self.setWeekday()
+        self.Set_Weekday()
 
-    def getDate(self):
+    def Get_Date(self):
         return self.date
 
-    def setLesson(self, Lesson):
+    def Set_Lesson(self, Lesson):
         self.lesson = Lesson
 
-    def getLesson(self):
+    def Get_Lesson(self):
         return self.lesson
 
-    def setTask(self, Task):
+    def Set_Task(self, Task):
         self.task = Task
 
-    def getTask(self):
+    def Get_Task(self):
         return self.task
 
-    def clearStack(self):
+    def Clear_Stack(self):
         self.date = None
         self.weekday = None
         self.lesson = None
