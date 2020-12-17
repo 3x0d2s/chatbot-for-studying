@@ -30,7 +30,7 @@ class Homework:
         idThisWeekday = now.weekday()
         #
         if idSecondWeekday <= idThisWeekday:
-            delt = (6 - idThisWeekday) + idSecondWeekday  # 2 - ср . 3 - чт
+            delt = (6 - idThisWeekday) + idSecondWeekday
             dur_days = datetime.timedelta(days=(delt + 1))
             result = now + dur_days
             date = result.strftime('%d.%m.%Y')

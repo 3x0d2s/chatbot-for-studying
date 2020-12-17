@@ -1,13 +1,13 @@
 #
+import config
+import datetime
+import re
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from bd_direct import bdDirect
 from directHomework import Homework
 from check_InputData import *
-import config
-import datetime
-import re
 #
 vk_session = vk_api.VkApi(token=config.token)
 session_api = vk_session.get_api()
@@ -506,9 +506,17 @@ def CheckCommand(event, msg):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
     #
-    if msg == 'Start' or msg == 'Начать':
-        write_msg_withKeyboard(
-            event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
+    if msg == 'Домашнее задание':
+        db.changeUserHomewFlag(event.user_id, True)
+        ShowWeekdays(event)
+    elif msg == 'Расписание':
+        db.changeUserSchedFlag(event.user_id, True)
+        ShowWeekdays(event)
+    elif msg == 'На сегодня' or msg == 'На завтра':
+        OperTodayOrTomorrow(event)
+    elif (msg == 'Понедельник' or msg == 'Вторник' or msg == 'Среда'
+          or msg == 'Четверг' or msg == 'Пятница' or msg == 'Суббота'):
+        OperWithWeekdays(event, msg)
     elif msg == 'В главное меню':
         if Schedule_flag == True:
             db.changeUserSchedFlag(event.user_id, False)
@@ -522,17 +530,9 @@ def CheckCommand(event, msg):
             db.changeUserDelHomewFlag(event.user_id, False)
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
-    elif msg == 'Расписание':
-        db.changeUserSchedFlag(event.user_id, True)
-        ShowWeekdays(event)
-    elif msg == 'Домашнее задание':
-        db.changeUserHomewFlag(event.user_id, True)
-        ShowWeekdays(event)
-    elif msg == 'На сегодня' or msg == 'На завтра':
-        OperTodayOrTomorrow(event)
-    elif (msg == 'Понедельник' or msg == 'Вторник' or msg == 'Среда'
-          or msg == 'Четверг' or msg == 'Пятница' or msg == 'Суббота'):
-        OperWithWeekdays(event, msg)
+    elif msg == 'Указать число':
+        if Homework_flag or addHomework_flag == True or delHomework_flag == True:
+            Set_Date()
     elif msg == 'Редактирование':
         if userIsAdminCheck(event) == True:
             Editing()
@@ -544,9 +544,6 @@ def CheckCommand(event, msg):
         if userIsAdminCheck(event) == True:
             db.changeUserDelHomewFlag(event.user_id, True)
             MenuDelete_Homework()
-    elif msg == 'Указать число':
-        if Homework_flag or addHomework_flag == True or delHomework_flag == True:
-            Set_Date()
     elif msg == 'Удалить старое ДЗ':
         if userIsAdminCheck(event) == True:
             if delHomework_flag == True:
@@ -573,6 +570,9 @@ def CheckCommand(event, msg):
             Homework.Clear_Stack()
             db.changeUserHomewFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
+        write_msg_withKeyboard(
+            event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
+    elif msg == 'Начать':
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
     else:
