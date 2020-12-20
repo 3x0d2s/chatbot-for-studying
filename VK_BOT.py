@@ -399,7 +399,7 @@ def MenuDelete_Homework():
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def Delete_OldHomework():
+def Delete_OldHomework(mode=0):
     db = bdDirect('Data Base/db.db')
     allHomework = db.get_allHomework()
     wasItDeleted = False
@@ -418,11 +418,17 @@ def Delete_OldHomework():
                 if wasItDeleted == False:
                     wasItDeleted = True
     db.close()
-    if wasItDeleted == True:
-        msg = 'Всё старое домашнее задание было удалено.'
+    if mode == 0:
+        if wasItDeleted == True:
+            msg = 'Всё старое домашнее задание было удалено.'
+        else:
+            msg = 'Старое домашнее задание не было найдено.'
+        write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
     else:
-        msg = 'Старое домашнее задание не было найдено.'
-    write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
+        if wasItDeleted == True:
+            return True
+        else:
+            return False
 
 
 def Set_Date():
