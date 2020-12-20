@@ -95,7 +95,7 @@ def ShowWeekdays(event):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     db.close()
     #
-    if Schedule_flag == True:
+    if Homework_flag == True:
         msg = 'Выберите день недели или укажите дату...'
     else:
         msg = 'Выберите день недели...'
