@@ -95,7 +95,10 @@ def ShowWeekdays(event):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     db.close()
     #
-    msg = 'Выберите день недели или укажите дату...'
+    if Schedule_flag == True:
+        msg = 'Выберите день недели или укажите дату...'
+    else:
+        msg = 'Выберите день недели...'
     keyboard = VkKeyboard(one_time=False)
     if Schedule_flag == True or Homework_flag == True:
         if Homework_flag == True:
