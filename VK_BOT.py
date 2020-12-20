@@ -273,7 +273,7 @@ def OperTodayOrTomorrow(event):
                 if idWeekday == 6:
                     SendHomework(event, weekdays[0], 2)
                 else:
-                    SendHomework(weekdays[idWeekday + 1], 2)
+                    SendHomework(event, weekdays[idWeekday + 1], 2)
         elif addHomework_flag == True:
             if idWeekday == 6:
                 Homework.Set_Weekday(weekdays[0])
