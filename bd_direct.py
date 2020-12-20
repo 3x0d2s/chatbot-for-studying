@@ -80,16 +80,24 @@ class bdDirect:
             return self.cursor.execute(
                 "UPDATE users SET step_code=? WHERE user_id=?", (value, user_id))
 
-    def get_Lesson(self, weekday):
+    def get_Lesson(self, weekday, weekConfig):
         with self.connection:
-            self.cursor.execute(
-                "SELECT * FROM `schedule` WHERE weekday IN (?)", (weekday, ))
+            if weekConfig == '1':
+                self.cursor.execute(
+                    "SELECT * FROM `schedule_1` WHERE weekday IN (?)", (weekday, ))
+            elif weekConfig == '2':
+                self.cursor.execute(
+                    "SELECT * FROM `schedule_2` WHERE weekday IN (?)", (weekday, ))
             return self.cursor.fetchall()
 
-    def get_allLesson(self):
+    def get_allLesson(self, weekConfig):
         with self.connection:
-            self.cursor.execute(
-                "SELECT weekday, lesson_name FROM `schedule`")
+            if weekConfig == '1':
+                self.cursor.execute(
+                    "SELECT weekday, lesson_name FROM `schedule_1`")
+            elif weekConfig == '2':
+                self.cursor.execute(
+                    "SELECT weekday, lesson_name FROM `schedule_2`")
             return self.cursor.fetchall()
 
     def get_Homework(self, date):

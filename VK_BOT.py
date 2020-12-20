@@ -8,6 +8,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from bd_direct import bdDirect
 from directHomework import Homework
 from check_InputData import *
+import configpars
 #
 vk_session = vk_api.VkApi(token=config.token)
 session_api = vk_session.get_api()
@@ -154,17 +155,18 @@ def Accusative(weekday):
 
 def SendSchedule(weekday):
     if weekday != 'Воскресенье':
+        weekConfig = configpars.getWeekConfig('Settings.ini')
         db = bdDirect('Data Base/db.db')
-        lesson = db.get_Lesson(weekday)
+        lesson = db.get_Lesson(weekday, weekConfig)
         db.close()
         #
         listLessons = []
         rowcount = len(lesson)
         for row in range(rowcount):
-            start_time = lesson[row][2]
-            end_time = lesson[row][3]
-            lesson_name = lesson[row][4]
-            cabinet = lesson[row][5]
+            start_time = lesson[row][1]
+            end_time = lesson[row][2]
+            lesson_name = lesson[row][3]
+            cabinet = lesson[row][4]
             msg = str('🔹 ' + lesson_name + ' ' + start_time +
                       '-' + end_time + ' | ' + str(cabinet))
             listLessons.append(msg)
@@ -280,8 +282,9 @@ def OperTodayOrTomorrow(event):
 
 
 def get_DateByLesson(lesson):
+    weekConfig = configpars.getWeekConfig('Settings.ini')
     db = bdDirect('Data Base/db.db')
-    lessons = db.get_allLesson()
+    lessons = db.get_allLesson(weekConfig)
     db.close()
     #
     lesson = msg
