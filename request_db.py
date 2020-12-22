@@ -1,7 +1,7 @@
 import sqlite3
 
 
-class bdDirect:
+class requestDB:
 
     def __init__(self, database):
         """Подключаемся к БД и сохраняем курсор соединения"""

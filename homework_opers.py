@@ -3,7 +3,7 @@ import datetime
 
 class Homework:
 
-    def Set_Weekday(self, value=None):
+    def set_Weekday(self, value=None):
         if value == None:
             idWeekday = datetime.datetime.strptime(
                 self.date, '%d.%m.%Y').weekday()
@@ -12,12 +12,12 @@ class Homework:
             self.weekday = weekdays[idWeekday]
         else:
             self.weekday = value
-            self.Get_DateByWeekday(value)
+            self.get_DateByWeekday(value)
 
-    def Get_Weekday(self):
+    def get_Weekday(self):
         return self.weekday
 
-    def Get_DateByWeekday(self, weekday, mode=0):
+    def get_DateByWeekday(self, weekday, mode=0):
         weekdays = ['Понедельник', 'Вторник', 'Среда',
                     'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
         idSecondWeekday = 0
@@ -35,7 +35,7 @@ class Homework:
             result = now + dur_days
             date = result.strftime('%d.%m.%Y')
             if mode == 0:
-                self.Set_Date(date)
+                self.set_Date(date)
             elif mode == 1:
                 return date
         elif idSecondWeekday > idThisWeekday:
@@ -44,30 +44,30 @@ class Homework:
             result = now + dur_days
             date = result.strftime('%d.%m.%Y')
             if mode == 0:
-                self.Set_Date(date)
+                self.set_Date(date)
             elif mode == 1:
                 return date
 
-    def Set_Date(self, Date):
+    def set_Date(self, Date):
         self.date = Date
-        self.Set_Weekday()
+        self.set_Weekday()
 
-    def Get_Date(self):
+    def get_Date(self):
         return self.date
 
-    def Set_Lesson(self, Lesson):
+    def set_Lesson(self, Lesson):
         self.lesson = Lesson
 
-    def Get_Lesson(self):
+    def get_Lesson(self):
         return self.lesson
 
-    def Set_Task(self, Task):
+    def set_Task(self, Task):
         self.task = Task
 
-    def Get_Task(self):
+    def get_Task(self):
         return self.task
 
-    def Clear_Stack(self):
+    def clear_Stack(self):
         self.date = None
         self.weekday = None
         self.lesson = None

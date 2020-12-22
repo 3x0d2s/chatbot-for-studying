@@ -1,7 +1,7 @@
 import shutil
 import os
 import datetime
-from VK_BOT import Delete_OldHomework
+from VK_BOT import delete_OldHomework
 
 FILE = 'Data Base/db.db'
 
@@ -11,7 +11,7 @@ if not os.path.isdir('Data Base/Backups'):
 if os.path.isfile(FILE):
     shutil.copy(FILE, 'Data Base/Backups/db_' +
                 datetime.datetime.now().strftime('%d-%m-%Y') + '.db')
-    status = Delete_OldHomework(1)
+    status = delete_OldHomework(1)
     logfile = open('Data Base/log.txt', 'a', encoding='utf-8')
     if status == True:
         logfile.write('[' + str(datetime.datetime.now()) +

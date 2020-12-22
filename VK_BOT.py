@@ -5,10 +5,10 @@ import re
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-from bd_direct import bdDirect
-from directHomework import Homework
+from request_db import requestDB
+from homework_opers import Homework
 from check_InputData import *
-import configpars
+import config_pars
 #
 vk_session = vk_api.VkApi(token=config.token)
 session_api = vk_session.get_api()
@@ -56,7 +56,7 @@ def get_EditingKeyboard():
 
 def getUsers():
     global users
-    db = bdDirect('Data Base/db.db')
+    db = requestDB('Data Base/db.db')
     users = db.get_users()
     db.close()
 
@@ -70,12 +70,12 @@ def checkUser(event):
                 newUser = False
                 break
         if newUser == True:
-            db = bdDirect('Data Base/db.db')
+            db = requestDB('Data Base/db.db')
             db.add_user(event.user_id)
             db.close()
             getUsers()
     else:
-        db = bdDirect('Data Base/db.db')
+        db = requestDB('Data Base/db.db')
         db.add_user(event.user_id)
         db.close()
         getUsers()
@@ -88,8 +88,8 @@ def userIsAdminCheck(event):
             return users[user][1]  # True or False
 
 
-def ShowWeekdays(event):
-    db = bdDirect('Data Base/db.db')
+def showWeekdays(event):
+    db = requestDB('Data Base/db.db')
     Homework_flag = db.getUserHomewFlag(event.user_id)
     Schedule_flag = db.getUserSchedFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
@@ -124,8 +124,8 @@ def ShowWeekdays(event):
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def OperWithWeekdays(event, msg):
-    db = bdDirect('Data Base/db.db')
+def operWithWeekdays(event, msg):
+    db = requestDB('Data Base/db.db')
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     Homework_flag = db.getUserHomewFlag(event.user_id)
     Schedule_flag = db.getUserSchedFlag(event.user_id)
@@ -133,19 +133,19 @@ def OperWithWeekdays(event, msg):
     step_code = db.getUserStepCode(event.user_id)
     #
     if Homework_flag == True:
-        SendHomework(event, msg)
+        sendHomework(event, msg)
         db.changeUserHomewFlag(event.user_id, False)
     elif Schedule_flag == True:
-        SendSchedule(msg)
+        sendSchedule(msg)
         db.changeUserSchedFlag(event.user_id, False)
     elif addHomework_flag == True or delHomework_flag == True:
-        Homework.Set_Weekday(msg)
+        Homework.set_Weekday(msg)
         db.changeUserStepCode(event.user_id, (step_code + 1))
-        Set_Lesson()
+        set_Lesson()
     db.close()
 
 
-def Accusative(weekday):
+def accusative(weekday):
     if weekday == 'Среда':
         return 'Среду'
     elif weekday == 'Пятница':
@@ -156,10 +156,10 @@ def Accusative(weekday):
         return weekday
 
 
-def SendSchedule(weekday):
+def sendSchedule(weekday):
     if weekday != 'Воскресенье':
-        weekConfig = configpars.getWeekConfig('Settings.ini')
-        db = bdDirect('Data Base/db.db')
+        weekConfig = config_pars.getWeekConfig('Settings.ini')
+        db = requestDB('Data Base/db.db')
         lesson = db.get_Lesson(weekday, weekConfig)
         db.close()
         #
@@ -173,7 +173,7 @@ def SendSchedule(weekday):
             msg = str('🔹 ' + lesson_name + ' ' + start_time +
                       '-' + end_time + ' | ' + str(cabinet))
             listLessons.append(msg)
-        msg = '📚 Расписание уроков на ' + Accusative(weekday) + ':'
+        msg = '📚 Расписание уроков на ' + accusative(weekday) + ':'
         for row in listLessons:
             msg = msg + '\n' + row
     elif weekday == 'Воскресенье':
@@ -181,19 +181,19 @@ def SendSchedule(weekday):
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
-def SendHomework(event, weekday=None, mode=0, today=False):
-    db = bdDirect('Data Base/db.db')
+def sendHomework(event, weekday=None, mode=0, today=False):
+    db = requestDB('Data Base/db.db')
     if weekday != None:
         if today == True:
             now = datetime.datetime.now().strftime('%d.%m.%Y')
-            Homework.Set_Date(str(now))
+            Homework.set_Date(str(now))
         else:
-            Homework.Get_DateByWeekday(weekday)
+            Homework.get_DateByWeekday(weekday)
     else:
-        Homework.Set_Weekday()
-        weekday = Homework.Get_Weekday()
+        Homework.set_Weekday()
+        weekday = Homework.get_Weekday()
     #
-    date = Homework.Get_Date()
+    date = Homework.get_Date()
     if weekday != 'Воскресенье':
         homework_tasks = db.get_Homework(date)
         rowcount = len(homework_tasks)
@@ -202,13 +202,13 @@ def SendHomework(event, weekday=None, mode=0, today=False):
             for row in range(rowcount):
                 lesson_name = homework_tasks[row][0]
                 task = homework_tasks[row][1]
-                if CheckNewLineInTaskText(task) == True:
+                if checkNewLineInTaskText(task) == True:
                     msg = str('♦ ' + lesson_name + ':\n' + task)
                 else:
                     msg = str('♦ ' + lesson_name + ': ' + task)
                 listHomework.append(msg)
             msg = '📝 Домашнее задание на ' + \
-                Accusative(weekday) + ' (' + date + ')' + ':'
+                accusative(weekday) + ' (' + date + ')' + ':'
             for rows in listHomework:
                 msg = msg + '\n' + rows
         else:
@@ -217,7 +217,7 @@ def SendHomework(event, weekday=None, mode=0, today=False):
                     msg = 'На ближайший ' + weekday.lower() + ' нет домашнего задания.'
                 else:
                     msg = 'На ближайшую ' + \
-                        Accusative(weekday).lower() + ' нет домашнего задания.'
+                        accusative(weekday).lower() + ' нет домашнего задания.'
             elif mode == 1:
                 msg = 'На сегодня нет домашнего задания.'
             elif mode == 2:
@@ -225,29 +225,29 @@ def SendHomework(event, weekday=None, mode=0, today=False):
             elif mode == 3:
                 if weekday == 'Понедельник' or weekday == 'Вторник' or weekday == 'Четверг':
                     msg = 'На ' + \
-                        Accusative(weekday).lower() + ' ' + \
+                        accusative(weekday).lower() + ' ' + \
                         date + ' нет домашнего задания.'
                 else:
                     msg = 'На ' + \
-                        Accusative(weekday).lower() + ' ' + \
+                        accusative(weekday).lower() + ' ' + \
                         date + ' нет домашнего задания.'
     elif weekday == 'Воскресенье':
         msg = 'Домашнее задание на воскресенье? Совсем переучились?'
-    Homework.Clear_Stack()
+    Homework.clear_Stack()
     db.changeUserHomewFlag(event.user_id, False)
     db.close()
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
-def CheckNewLineInTaskText(task):
+def checkNewLineInTaskText(task):
     pattern = re.compile(r'\n')
     if pattern.findall(task):
         return True
     return False
 
 
-def OperTodayOrTomorrow(event):
-    db = bdDirect('Data Base/db.db')
+def operTodayOrTomorrow(event):
+    db = requestDB('Data Base/db.db')
     Schedule_flag = db.getUserSchedFlag(event.user_id)
     Homework_flag = db.getUserHomewFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
@@ -259,34 +259,34 @@ def OperTodayOrTomorrow(event):
         if Schedule_flag == True:
             db.changeUserSchedFlag(event.user_id, False)
             if msg == 'На сегодня':
-                SendSchedule(weekdays[idWeekday])
+                sendSchedule(weekdays[idWeekday])
             elif msg == 'На завтра':
                 if idWeekday == 6:
-                    SendSchedule(weekdays[0])
+                    sendSchedule(weekdays[0])
                 else:
-                    SendSchedule(weekdays[idWeekday + 1])
+                    sendSchedule(weekdays[idWeekday + 1])
         elif Homework_flag == True:
             db.changeUserHomewFlag(event.user_id, False)
             if msg == 'На сегодня':
-                SendHomework(event, weekdays[idWeekday], 1, True)
+                sendHomework(event, weekdays[idWeekday], 1, True)
             elif msg == 'На завтра':
                 if idWeekday == 6:
-                    SendHomework(event, weekdays[0], 2)
+                    sendHomework(event, weekdays[0], 2)
                 else:
-                    SendHomework(event, weekdays[idWeekday + 1], 2)
+                    sendHomework(event, weekdays[idWeekday + 1], 2)
         elif addHomework_flag == True:
             if idWeekday == 6:
-                Homework.Set_Weekday(weekdays[0])
+                Homework.set_Weekday(weekdays[0])
             else:
-                Homework.Set_Weekday(weekdays[idWeekday + 1])
+                Homework.set_Weekday(weekdays[idWeekday + 1])
             db.changeUserStepCode(event.user_id, 1)
-            Set_Lesson()
+            set_Lesson()
     db.close()
 
 
 def get_DateByLesson(lesson):
-    weekConfig = configpars.getWeekConfig('Settings.ini')
-    db = bdDirect('Data Base/db.db')
+    weekConfig = config_pars.getWeekConfig('Settings.ini')
+    db = requestDB('Data Base/db.db')
     lessons = db.get_allLesson(weekConfig)
     db.close()
     #
@@ -297,7 +297,7 @@ def get_DateByLesson(lesson):
         if lesson == lessons[step][1]:  # 0 - weekday 1 - lesson
             weekday = lessons[step][0]
             date = datetime.datetime.strptime(
-                Homework.Get_DateByWeekday(weekday, 1), '%d.%m.%Y')
+                Homework.get_DateByWeekday(weekday, 1), '%d.%m.%Y')
             main_list.append([date, weekday])
     if len(main_list) > 0:
         now = datetime.datetime.now().replace(
@@ -308,19 +308,19 @@ def get_DateByLesson(lesson):
             idStepLesson = step[0].weekday()
             if idStepLesson > idThisWeekday:
                 if step[1] == 'Вторник':
-                    return lesson + ' будет во ' + Accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
+                    return lesson + ' будет во ' + accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
                 else:
-                    return lesson + ' будет в ' + Accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
+                    return lesson + ' будет в ' + accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
         if main_list[0][1] == 'Вторник':
-            return lesson + ' будет во ' + Accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
+            return lesson + ' будет во ' + accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
         else:
-            return lesson + ' будет в ' + Accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
+            return lesson + ' будет в ' + accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
     else:
         return 'Такой урок не был найден.'
 
 
-def OperDelOrAddHomework(event, msg):
-    db = bdDirect('Data Base/db.db')
+def operDelOrAddHomework(event, msg):
+    db = requestDB('Data Base/db.db')
     Homework_flag = db.getUserHomewFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
@@ -331,30 +331,30 @@ def OperDelOrAddHomework(event, msg):
         # Date
         if step_code == 0:
             if Check_Date(msg) == True:
-                Homework.Set_Date(msg)
+                Homework.set_Date(msg)
                 if Homework_flag == True:
-                    SendHomework(event, None, 3)
+                    sendHomework(event, None, 3)
                 else:
                     db.changeUserStepCode(event.user_id, (step_code + 1))
-                    Set_Lesson()
+                    set_Lesson()
             else:
                 msg = 'Ошибка даты: неверный формат.'
                 write_msg(event.user_id, msg)
-                Set_Date()
+                set_Date()
         if userIsAdminCheck(event) == True:
             # Lesson
             if step_code == 1:
                 if Check_Lesson(msg) == True:
                     if addHomework_flag == True:
-                        Homework.Set_Lesson(msg)
+                        Homework.set_Lesson(msg)
                         db.changeUserStepCode(event.user_id, (step_code + 1))
-                        Set_Task()
+                        set_Task()
                     elif delHomework_flag == True:
-                        Homework.Set_Lesson(msg)
+                        Homework.set_Lesson(msg)
                         db.changeUserStepCode(event.user_id, 0)
                         db.changeUserDelHomewFlag(event.user_id, False)
-                        Delete_Homework()
-                        Homework.Clear_Stack()
+                        delete_Homework()
+                        Homework.clear_Stack()
                     elif getLessonDate_flag == True:
                         msg = get_DateByLesson(msg)
                         db.changeUserStepCode(event.user_id, 0)
@@ -364,31 +364,31 @@ def OperDelOrAddHomework(event, msg):
                 else:
                     msg = 'Ошибка названия урока: длина не может превышать 16 символов.'
                     write_msg(event.user_id, msg)
-                    Set_Lesson()
+                    set_Lesson()
             # Task
             elif step_code == 2:
                 if Check_Tasks(msg) == True:
-                    Homework.Set_Task(msg)
+                    Homework.set_Task(msg)
                     db.changeUserStepCode(event.user_id, 0)
                     db.changeUserAddHomewFlag(event.user_id, False)
-                    Set_Homework()
-                    Homework.Clear_Stack()
+                    set_Homework()
+                    Homework.clear_Stack()
                 else:
                     msg = 'Ошибка задач: длина не может превышать 512 символов.'
                     write_msg(event.user_id, msg)
-                    Set_Task()
+                    set_Task()
     else:
         msg = 'Данной команды не существует.'
         write_msg(event.user_id, msg)
     db.close()
 
 
-def Editing():
+def editing():
     msg = 'Выберите действие...'
     write_msg_withKeyboard(event.user_id, msg, get_EditingKeyboard())
 
 
-def MenuAdd_Homework():
+def menu_AddHomework():
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Указать день недели',
                         color=VkKeyboardColor.SECONDARY)
@@ -401,7 +401,7 @@ def MenuAdd_Homework():
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def MenuDelete_Homework():
+def menu_DeleteHomework():
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Указать число',
                         color=VkKeyboardColor.SECONDARY)
@@ -413,8 +413,8 @@ def MenuDelete_Homework():
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def Delete_OldHomework(mode=0):
-    db = bdDirect('Data Base/db.db')
+def delete_OldHomework(mode=0):
+    db = requestDB('Data Base/db.db')
     allHomework = db.get_allHomework()
     wasItDeleted = False
     #
@@ -446,34 +446,34 @@ def Delete_OldHomework(mode=0):
     db.close()
 
 
-def Set_Date():
+def set_Date():
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Введите число в формате (День).(Месяц).(Год). Например 03.11.2018'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def Set_Lesson():
+def set_Lesson():
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Введите название урока...'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def Set_Task():
+def set_Task():
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Введите все задачи...'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def Set_Homework():
-    date = Homework.Get_Date()
-    weekDay = Homework.Get_Weekday()
-    lesson = Homework.Get_Lesson()
-    task = Homework.Get_Task()
+def set_Homework():
+    date = Homework.get_Date()
+    weekDay = Homework.get_Weekday()
+    lesson = Homework.get_Lesson()
+    task = Homework.get_Task()
     #
-    db = bdDirect('Data Base/db.db')
+    db = requestDB('Data Base/db.db')
     if db.check_Homework(date, lesson) == False:
         db.add_Homework(date, weekDay, lesson, task)
         if db.check_Homework(date, lesson) == True:
@@ -500,11 +500,11 @@ def Set_Homework():
     db.close()
 
 
-def Delete_Homework():
-    date = Homework.Get_Date()
-    lesson = Homework.Get_Lesson()
+def delete_Homework():
+    date = Homework.get_Date()
+    lesson = Homework.get_Lesson()
     #
-    db = bdDirect('Data Base/db.db')
+    db = requestDB('Data Base/db.db')
     if db.check_Homework(date, lesson) == True:
         db.del_Homework(date, lesson)
         db.close()
@@ -520,8 +520,8 @@ def Delete_Homework():
         write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def CheckCommand(event, msg):
-    db = bdDirect('Data Base/db.db')
+def checkCommand(event, msg):
+    db = requestDB('Data Base/db.db')
     Homework_flag = db.getUserHomewFlag(event.user_id)
     Schedule_flag = db.getUserSchedFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
@@ -529,66 +529,66 @@ def CheckCommand(event, msg):
     #
     if msg == 'Домашнее задание':
         db.changeUserHomewFlag(event.user_id, True)
-        ShowWeekdays(event)
+        showWeekdays(event)
     elif msg == 'Расписание':
         db.changeUserSchedFlag(event.user_id, True)
-        ShowWeekdays(event)
+        showWeekdays(event)
     elif msg == 'На сегодня' or msg == 'На завтра':
-        OperTodayOrTomorrow(event)
+        operTodayOrTomorrow(event)
     elif (msg == 'Понедельник' or msg == 'Вторник' or msg == 'Среда'
           or msg == 'Четверг' or msg == 'Пятница' or msg == 'Суббота'):
-        OperWithWeekdays(event, msg)
+        operWithWeekdays(event, msg)
     elif msg == 'В главное меню':
         if Schedule_flag == True:
             db.changeUserSchedFlag(event.user_id, False)
         elif Homework_flag == True:
             db.changeUserHomewFlag(event.user_id, False)
         elif addHomework_flag == True:
-            Homework.Clear_Stack()
+            Homework.clear_Stack()
             db.changeUserAddHomewFlag(event.user_id, False)
         elif delHomework_flag == True:
-            Homework.Clear_Stack()
+            Homework.clear_Stack()
             db.changeUserDelHomewFlag(event.user_id, False)
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
     elif msg == 'Указать число':
         if Homework_flag or addHomework_flag == True or delHomework_flag == True:
-            Set_Date()
+            set_Date()
     elif msg == 'Редактирование':
         if userIsAdminCheck(event) == True:
-            Editing()
+            editing()
     elif msg == 'Добавить домашнее задание':
         if userIsAdminCheck(event) == True:
             db.changeUserAddHomewFlag(event.user_id, True)
-            MenuAdd_Homework()
+            menu_AddHomework()
     elif msg == 'Удаление домашнего задания':
         if userIsAdminCheck(event) == True:
             db.changeUserDelHomewFlag(event.user_id, True)
-            MenuDelete_Homework()
+            menu_DeleteHomework()
     elif msg == 'Удалить старое ДЗ':
         if userIsAdminCheck(event) == True:
             if delHomework_flag == True:
-                Delete_OldHomework()
+                delete_OldHomework()
     elif msg == 'Указать день недели':
         if userIsAdminCheck(event) == True:
             if addHomework_flag == True:
-                ShowWeekdays(event)
+                showWeekdays(event)
     elif msg == 'Когда следующий урок?':
         if userIsAdminCheck(event) == True:
             db.changeUserGetLessDateFlag(event.user_id, True)
             db.changeUserStepCode(event.user_id, 1)
-            Set_Lesson()
+            set_Lesson()
     elif msg == 'Отмена':
         if addHomework_flag == True:
-            Homework.Clear_Stack()
+            Homework.clear_Stack()
             db.changeUserAddHomewFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
         elif delHomework_flag == True:
-            Homework.Clear_Stack()
+            Homework.clear_Stack()
             db.changeUserDelHomewFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
         elif Homework_flag == True:
-            Homework.Clear_Stack()
+            Homework.clear_Stack()
             db.changeUserHomewFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
         write_msg_withKeyboard(
@@ -597,7 +597,7 @@ def CheckCommand(event, msg):
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
     else:
-        OperDelOrAddHomework(event, msg)
+        operDelOrAddHomework(event, msg)
     db.close()
 
 
@@ -608,4 +608,4 @@ if __name__ == '__main__':
             if event.to_me:
                 checkUser(event)
                 msg = event.text
-                CheckCommand(event, msg)
+                checkCommand(event, msg)
