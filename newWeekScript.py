@@ -2,6 +2,7 @@ import shutil
 import os
 import datetime
 from request_db import requestDB
+import config_pars
 
 
 FILE = 'Data Base/db.db'
@@ -54,3 +55,5 @@ else:
     logfile.write('[' + str(datetime.datetime.now()) +
                   '] - Ошибка бэкапа: отсуствует файл БД.\n')
     logfile.close()
+
+config_pars.changeWeekConfig('Settings.ini')
