@@ -95,10 +95,11 @@ def showWeekdays(event):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     db.close()
     #
-    if Homework_flag == True:
+    if Homework_flag or addHomework_flag == True:
         msg = 'Выберите день недели или укажите дату...'
     else:
         msg = 'Выберите день недели...'
+    #
     keyboard = VkKeyboard(one_time=False)
     if Schedule_flag == True or Homework_flag == True:
         if Homework_flag == True:
@@ -109,8 +110,10 @@ def showWeekdays(event):
         keyboard.add_button('На завтра', color=VkKeyboardColor.POSITIVE)
         keyboard.add_line()
     elif addHomework_flag == True:
+        keyboard.add_button('Указать число', color=VkKeyboardColor.POSITIVE)
         keyboard.add_button('На завтра', color=VkKeyboardColor.POSITIVE)
         keyboard.add_line()
+    #
     keyboard.add_button('Понедельник', color=VkKeyboardColor.SECONDARY)
     keyboard.add_button('Вторник', color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
@@ -406,44 +409,9 @@ def menu_DeleteHomework():
     keyboard.add_button('Указать число',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
-    keyboard.add_button('Удалить старое ДЗ', color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
     keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
     msg = 'Выберите действие...'
     write_msg_withKeyboard(event.user_id, msg, keyboard)
-
-
-def delete_OldHomework(mode=0):
-    db = requestDB('Data Base/db.db')
-    allHomework = db.get_allHomework()
-    wasItDeleted = False
-    #
-    rowcount = len(allHomework)
-    if rowcount > 0:
-        now = datetime.datetime.now().replace(
-            hour=0, second=0, microsecond=0, minute=0)
-        for row in range(rowcount):
-            date = allHomework[row][0]
-            homew_date = datetime.datetime.strptime(
-                date, '%d.%m.%Y')
-            if now > homew_date:
-                lesson = allHomework[row][1]
-                db.del_Homework(date, lesson)
-                if wasItDeleted == False:
-                    wasItDeleted = True
-    if mode == 0:
-        if wasItDeleted == True:
-            msg = 'Всё старое домашнее задание было удалено.'
-        else:
-            msg = 'Старое домашнее задание не было найдено.'
-        db.changeUserDelHomewFlag(event.user_id, False)
-        write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
-    else:
-        if wasItDeleted == True:
-            return True
-        else:
-            return False
-    db.close()
 
 
 def set_Date():
@@ -526,6 +494,7 @@ def checkCommand(event, msg):
     Schedule_flag = db.getUserSchedFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
+    getLessDate_flag = db.getUserGetLessDateFlag(event.user_id)
     #
     if msg == 'Домашнее задание':
         db.changeUserHomewFlag(event.user_id, True)
@@ -560,19 +529,11 @@ def checkCommand(event, msg):
     elif msg == 'Добавить домашнее задание':
         if userIsAdminCheck(event) == True:
             db.changeUserAddHomewFlag(event.user_id, True)
-            menu_AddHomework()
+            showWeekdays(event)
     elif msg == 'Удаление домашнего задания':
         if userIsAdminCheck(event) == True:
             db.changeUserDelHomewFlag(event.user_id, True)
             menu_DeleteHomework()
-    elif msg == 'Удалить старое ДЗ':
-        if userIsAdminCheck(event) == True:
-            if delHomework_flag == True:
-                delete_OldHomework()
-    elif msg == 'Указать день недели':
-        if userIsAdminCheck(event) == True:
-            if addHomework_flag == True:
-                showWeekdays(event)
     elif msg == 'Когда следующий урок?':
         if userIsAdminCheck(event) == True:
             db.changeUserGetLessDateFlag(event.user_id, True)
@@ -590,6 +551,9 @@ def checkCommand(event, msg):
         elif Homework_flag == True:
             Homework.clear_Stack()
             db.changeUserHomewFlag(event.user_id, False)
+            db.changeUserStepCode(event.user_id, 0)
+        elif getLessDate_flag == True:
+            db.changeUserGetLessDateFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
