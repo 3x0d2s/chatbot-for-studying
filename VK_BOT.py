@@ -44,6 +44,9 @@ def get_EditingKeyboard():
     keyboard.add_button('Добавить домашнее задание',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
+    keyboard.add_button('Редактировать домашнее задание',
+                        color=VkKeyboardColor.SECONDARY)
+    keyboard.add_line()
     keyboard.add_button('Удаление домашнего задания',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
@@ -322,6 +325,33 @@ def get_DateByLesson(lesson):
         return 'Такой урок не был найден.'
 
 
+def editHomework(event, msg):
+    pattern = re.compile('::')
+    if pattern.findall(msg):
+        result = None
+        сommand_parts = msg.split('::')
+        lesson_h = сommand_parts[0]
+        task_h = сommand_parts[1]
+        if Check_Lesson(lesson_h) == False:
+            result = 'Ошибка названия урока: длина не может превышать 32 символа.\n'
+        if Check_Tasks(task_h) == False:
+            result += 'Ошибка текста задания: длина не может превышать 512 символов.\n'
+        if result == None:
+            date_h = Homework.get_Date()
+            db = requestDB('Data Base/db.db')
+            if db.check_Homework(date_h, lesson_h) == True:
+                db.editHomework(date_h, lesson_h, task_h)
+                db.close()
+                msg = 'Домашнее задание было отредактировано.'
+            else:
+                msg = 'Указанное домашнее задание не существует.'
+        else:
+            msg = result
+    else:
+        msg = 'Ошибка формата команды.'
+    write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
+
+
 def operDelOrAddHomework(event, msg):
     db = requestDB('Data Base/db.db')
     Homework_flag = db.getUserHomewFlag(event.user_id)
@@ -329,28 +359,38 @@ def operDelOrAddHomework(event, msg):
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
     getLessonDate_flag = db.getUserGetLessDateFlag(event.user_id)
     step_code = db.getUserStepCode(event.user_id)
+    editHomework_flag = db.getUserEditHomewFlag(event.user_id)
     #
-    if addHomework_flag == True or delHomework_flag == True or Homework_flag == True or getLessonDate_flag == True:
+    if addHomework_flag or delHomework_flag or Homework_flag or getLessonDate_flag or editHomework_flag == True:
         # Date
         if step_code == 0:
             if Check_Date(msg) == True:
                 Homework.set_Date(msg)
                 if Homework_flag == True:
                     sendHomework(event, None, 3)
-                else:
-                    db.changeUserStepCode(event.user_id, (step_code + 1))
+                elif addHomework_flag or delHomework_flag == True:
+                    db.changeUserStepCode(event.user_id, 1)
                     set_Lesson()
+                else:
+                    db.changeUserStepCode(event.user_id, 1)
+                    getEditCommand(event)
             else:
                 msg = 'Ошибка даты: неверный формат.'
                 write_msg(event.user_id, msg)
                 set_Date()
+            #
         if userIsAdminCheck(event) == True:
             # Lesson
             if step_code == 1:
-                if Check_Lesson(msg) == True:
+                if editHomework_flag == True:
+                    editHomework(event, msg)
+                    Homework.clear_Stack()
+                    db.changeUserStepCode(event.user_id, 0)
+                    db.changeUserEditHomewFlag(event.user_id, False)
+                elif Check_Lesson(msg) == True:
                     if addHomework_flag == True:
                         Homework.set_Lesson(msg)
-                        db.changeUserStepCode(event.user_id, (step_code + 1))
+                        db.changeUserStepCode(event.user_id, 2)
                         set_Task()
                     elif delHomework_flag == True:
                         Homework.set_Lesson(msg)
@@ -384,6 +424,13 @@ def operDelOrAddHomework(event, msg):
         msg = 'Данной команды не существует.'
         write_msg(event.user_id, msg)
     db.close()
+
+
+def getEditCommand(event):
+    msg = 'Введите команду в формате (Название урока)-(Обновленное задание). Например Алгебра-Решить номера 150-155'
+    keyboard = VkKeyboard(one_time=False)
+    keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
 def editing():
@@ -495,6 +542,7 @@ def checkCommand(event, msg):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
     getLessDate_flag = db.getUserGetLessDateFlag(event.user_id)
+    editHomework_flag = db.getUserEditHomewFlag(event.user_id)
     #
     if msg == 'Домашнее задание':
         db.changeUserHomewFlag(event.user_id, True)
@@ -530,6 +578,10 @@ def checkCommand(event, msg):
         if userIsAdminCheck(event) == True:
             db.changeUserAddHomewFlag(event.user_id, True)
             showWeekdays(event)
+    elif msg == 'Редактировать домашнее задание':
+        if userIsAdminCheck(event) == True:
+            db.changeUserEditHomewFlag(event.user_id, True)
+            set_Date()
     elif msg == 'Удаление домашнего задания':
         if userIsAdminCheck(event) == True:
             db.changeUserDelHomewFlag(event.user_id, True)
@@ -552,6 +604,10 @@ def checkCommand(event, msg):
             Homework.clear_Stack()
             db.changeUserHomewFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
+        elif editHomework_flag == True:
+            Homework.clear_Stack()
+            db.changeUserStepCode(event.user_id, 0)
+            db.changeUserEditHomewFlag(event.user_id, False)
         elif getLessDate_flag == True:
             db.changeUserGetLessDateFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)

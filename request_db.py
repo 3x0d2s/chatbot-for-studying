@@ -50,6 +50,12 @@ class requestDB:
                 "SELECT step_code FROM users WHERE user_id=?", (user_id,))
             return (self.cursor.fetchall())[0][0]
 
+    def getUserEditHomewFlag(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT editHomew_f FROM users WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
     def changeUserHomewFlag(self, user_id, value):
         with self.connection:
             return self.cursor.execute(
@@ -79,6 +85,11 @@ class requestDB:
         with self.connection:
             return self.cursor.execute(
                 "UPDATE users SET step_code=? WHERE user_id=?", (value, user_id))
+
+    def changeUserEditHomewFlag(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE users SET editHomew_f=? WHERE user_id=?", (value, user_id))
 
     def get_Lesson(self, weekday, weekConfig):
         with self.connection:
@@ -111,6 +122,11 @@ class requestDB:
             self.cursor.execute(
                 "SELECT compl_date, lesson FROM `homework`")
             return self.cursor.fetchall()
+
+    def editHomework(self, date, lesson, task):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE homework SET task=? WHERE compl_date=? AND lesson=?", (task, date, lesson))
 
     def add_user(self, user_id):
         with self.connection:
