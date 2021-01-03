@@ -31,11 +31,10 @@ def showWeekdays(event):
         msg = 'Выберите день недели...'
     #
     keyboard = VkKeyboard(one_time=False)
+    if Homework_flag == True:
+        keyboard.add_button('Указать число', color=VkKeyboardColor.POSITIVE)
+        keyboard.add_line()
     if Schedule_flag == True or Homework_flag == True:
-        if Homework_flag == True:
-            keyboard.add_button(
-                'Указать число', color=VkKeyboardColor.POSITIVE)
-            keyboard.add_line()
         keyboard.add_button('На сегодня', color=VkKeyboardColor.POSITIVE)
         keyboard.add_button('На завтра', color=VkKeyboardColor.POSITIVE)
         keyboard.add_line()
@@ -88,16 +87,7 @@ def operTodayOrTomorrow(event):
         idWeekday = datetime.datetime.now().weekday()
         weekdays = ['Понедельник', 'Вторник', 'Среда',
                     'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
-        if Schedule_flag == True:
-            db.changeUserSchedFlag(event.user_id, False)
-            if msg == 'На сегодня':
-                sendSchedule(weekdays[idWeekday])
-            elif msg == 'На завтра':
-                if idWeekday == 6:
-                    sendSchedule(weekdays[0])
-                else:
-                    sendSchedule(weekdays[idWeekday + 1])
-        elif Homework_flag == True:
+        if Homework_flag == True:
             db.changeUserHomewFlag(event.user_id, False)
             if msg == 'На сегодня':
                 sendHomework(event, weekdays[idWeekday], 1, True)
@@ -106,6 +96,15 @@ def operTodayOrTomorrow(event):
                     sendHomework(event, weekdays[0], 2)
                 else:
                     sendHomework(event, weekdays[idWeekday + 1], 2)
+        elif Schedule_flag == True:
+            db.changeUserSchedFlag(event.user_id, False)
+            if msg == 'На сегодня':
+                sendSchedule(weekdays[idWeekday])
+            elif msg == 'На завтра':
+                if idWeekday == 6:
+                    sendSchedule(weekdays[0])
+                else:
+                    sendSchedule(weekdays[idWeekday + 1])
         elif addHomework_flag == True:
             if idWeekday == 6:
                 Homework.set_Weekday(weekdays[0])
@@ -133,8 +132,8 @@ def differentOperation(event, msg):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
     getLessonDate_flag = db.getUserGetLessDateFlag(event.user_id)
-    step_code = db.getUserStepCode(event.user_id)
     editHomework_flag = db.getUserEditHomewFlag(event.user_id)
+    step_code = db.getUserStepCode(event.user_id)
     #
     if addHomework_flag or delHomework_flag or Homework_flag or getLessonDate_flag or editHomework_flag == True:
         # Date
@@ -153,7 +152,6 @@ def differentOperation(event, msg):
                 msg = 'Ошибка даты: неверный формат.'
                 write_msg(event.user_id, msg)
                 set_Date()
-            #
         if userIsAdminCheck(event) == True:
             # Lesson
             if step_code == 1:
@@ -202,27 +200,29 @@ def differentOperation(event, msg):
 
 
 def sendSchedule(weekday):
-    if weekday != 'Воскресенье':
-        weekConfig = config_pars.getWeekConfig('Settings.ini')
-        db = requestDB('Data Base/db.db')
-        lesson = db.get_Lesson(weekday, weekConfig)
-        db.close()
-        #
-        listLessons = []
-        rowcount = len(lesson)
-        for row in range(rowcount):
-            start_time = lesson[row][1]
-            end_time = lesson[row][2]
-            lesson_name = lesson[row][3]
-            cabinet = lesson[row][4]
-            msg = str('🔹 ' + lesson_name + ' ' + start_time +
-                      '-' + end_time + ' | ' + str(cabinet))
-            listLessons.append(msg)
-        msg = '📚 Расписание уроков на ' + accusative(weekday) + ':'
-        for row in listLessons:
-            msg = msg + '\n' + row
-    elif weekday == 'Воскресенье':
+    if weekday == 'Воскресенье':
         msg = 'Уроки в воскресенье? Всё нормально? Лучше поспи, отдохни, хорошо покушай.'
+        write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
+        return
+    #
+    weekConfig = config_pars.getWeekConfig('Settings.ini')
+    db = requestDB('Data Base/db.db')
+    lesson = db.get_Lesson(weekday, weekConfig)
+    db.close()
+    #
+    listLessons = []
+    rowcount = len(lesson)
+    for row in range(rowcount):
+        start_time = lesson[row][1]
+        end_time = lesson[row][2]
+        lesson_name = lesson[row][3]
+        cabinet = lesson[row][4]
+        msg = str('🔹 ' + lesson_name + ' ' + start_time +
+                    '-' + end_time + ' | ' + str(cabinet))
+        listLessons.append(msg)
+    msg = '📚 Расписание уроков на ' + accusative(weekday) + ':'
+    for row in listLessons:
+        msg = msg + '\n' + row
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
@@ -379,7 +379,6 @@ def get_DateByLesson(lesson):
     #
     lesson = msg
     main_list = []
-    #
     for step in range(len(lessons)):
         if lesson == lessons[step][1]:  # 0 - weekday 1 - lesson
             weekday = lessons[step][0]
