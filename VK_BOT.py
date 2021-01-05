@@ -1,7 +1,7 @@
 #
+import re
 import config
 import datetime
-import re
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
@@ -218,7 +218,7 @@ def sendSchedule(weekday):
         lesson_name = lesson[row][3]
         cabinet = lesson[row][4]
         msg = str('🔹 ' + lesson_name + ' ' + start_time +
-                    '-' + end_time + ' | ' + str(cabinet))
+                  '-' + end_time + ' | ' + str(cabinet))
         listLessons.append(msg)
     msg = '📚 Расписание уроков на ' + accusative(weekday) + ':'
     for row in listLessons:
@@ -490,29 +490,6 @@ def editing():
     write_msg_withKeyboard(event.user_id, msg, get_EditingKeyboard())
 
 
-def menu_AddHomework():
-    keyboard = VkKeyboard(one_time=False)
-    keyboard.add_button('Указать день недели',
-                        color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
-    keyboard.add_button('Указать число',
-                        color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
-    keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
-    msg = 'Выберите вариант указания даты сдачи домашнего задания...'
-    write_msg_withKeyboard(event.user_id, msg, keyboard)
-
-
-def menu_DeleteHomework():
-    keyboard = VkKeyboard(one_time=False)
-    keyboard.add_button('Указать число',
-                        color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
-    keyboard.add_button('Отмена', color=VkKeyboardColor.POSITIVE)
-    msg = 'Выберите действие...'
-    write_msg_withKeyboard(event.user_id, msg, keyboard)
-
-
 def set_Date():
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
@@ -568,7 +545,7 @@ def checkCommand(event, msg):
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
     elif msg == 'Указать число':
-        if Homework_flag or addHomework_flag == True or delHomework_flag == True:
+        if Homework_flag or addHomework_flag == True:
             set_Date()
     elif msg == 'Редактирование':
         if userIsAdminCheck(event) == True:
@@ -584,7 +561,7 @@ def checkCommand(event, msg):
     elif msg == 'Удаление домашнего задания':
         if userIsAdminCheck(event) == True:
             db.changeUserDelHomewFlag(event.user_id, True)
-            menu_DeleteHomework()
+            set_Date()
     elif msg == 'Когда следующий урок?':
         if userIsAdminCheck(event) == True:
             db.changeUserGetLessDateFlag(event.user_id, True)
