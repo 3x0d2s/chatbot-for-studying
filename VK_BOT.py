@@ -479,7 +479,7 @@ def userIsAdminCheck(event):
 
 
 def getEditCommand(event):
-    msg = 'Введите команду в формате (Название урока)-(Обновленное задание). Например Алгебра-Решить номера 150-155'
+    msg = 'Введите команду в формате (Название урока)::(Обновленное задание). Например Алгебра::Решить номера 150-155'
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     write_msg_withKeyboard(event.user_id, msg, keyboard)
