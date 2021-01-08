@@ -239,6 +239,23 @@ def sendHomework(event, weekday=None, mode=0, today=False):
         weekday = Homework.get_Weekday()
     #
     date = Homework.get_Date()
+    #
+    # Проверка даты. Если пользовательно хочет узнать ДЗ на прошлую неделю, выводим сообщение.
+    date_type = datetime.datetime.strptime(date, '%d.%m.%Y')
+    now = datetime.datetime.now()
+    idNowWeekday = now.weekday()
+    delt = now - date_type
+    if int(delt.days) > idNowWeekday:
+        msg = 'Вы пытаетесь посмотреть домашнее задание на давний срок. В базе данных хранятся домашние \
+               задания только на текущую неделю. Чтобы всё-таки узнать домашнее задание, обратитесь к \
+               администратору - @3x0d2s(Максим Жданов).'
+        Homework.clear_Stack()
+        db.changeUserHomewFlag(event.user_id, False)
+        db.close()
+        write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
+        return
+    #
+    #
     if weekday != 'Воскресенье':
         homework_tasks = db.get_Homework(date)
         rowcount = len(homework_tasks)
@@ -290,7 +307,18 @@ def set_Homework():
     lesson = Homework.get_Lesson()
     task = Homework.get_Task()
     #
+    if weekDay == 'Воскресенье':
+        msg = 'Домашнее задание на воскресенье? Может не надо?'
+        keyboard = VkKeyboard(one_time=False)
+        keyboard.add_button('Добавить домашнее задание',
+                            color=VkKeyboardColor.SECONDARY)
+        keyboard.add_line()
+        keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
+        write_msg_withKeyboard(event.user_id, msg, keyboard)
+        return
+    #
     db = requestDB('Data Base/db.db')
+    #
     if db.check_Homework(date, lesson) == False:
         db.add_Homework(date, weekDay, lesson, task)
         if db.check_Homework(date, lesson) == True:
