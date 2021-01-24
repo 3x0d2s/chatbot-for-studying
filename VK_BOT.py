@@ -229,14 +229,13 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
     #
     date = Homework.get_Date()
     #
-    # Проверка даты. Если пользовательно хочет узнать ДЗ на прошлую неделю, выводим сообщение.
     date_type = datetime.datetime.strptime(date, '%d.%m.%Y')
     now = datetime.datetime.now()
     idNowWeekday = now.weekday()
     delt = now - date_type
     if int(delt.days) > idNowWeekday:
-        msg = 'Вы пытаетесь посмотреть домашнее задание на давний срок. В базе данных хранятся домашние \
-               задания только на текущую неделю. Чтобы всё-таки узнать домашнее задание, обратитесь к \
+        msg = 'Вы пытаетесь посмотреть домашнее задание на давний срок. В главной базе данных хранятся все домашние \
+               задания начиная с текущей недели. Чтобы всё-же узнать нужное вам домашнее задание, обратитесь к \
                администратору - @3x0d2s(Максим Жданов).'
         Homework.clear_Stack()
         db.changeUserHomewFlag(event.user_id, False)
@@ -353,9 +352,10 @@ def editHomework(event, msg):
     pattern = re.compile('::')
     if pattern.findall(msg):
         result = None
-        сommand_parts = msg.split('::')
+        сommand_parts = msg.split('::', maxsplit=1)
         lesson_h = сommand_parts[0]
         task_h = сommand_parts[1]
+        #
         if Check_Lesson(lesson_h) == False:
             result = 'Ошибка названия урока: длина не может превышать 32 символа.\n'
         if Check_Tasks(task_h) == False:
