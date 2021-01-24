@@ -124,11 +124,11 @@ def differentOperation(event, db, msg):
     Homework_flag = db.getUserHomewFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
-    getLessonDate_flag = db.getUserGetLessDateFlag(event.user_id)
+    # getLessonDate_flag = db.getUserGetLessDateFlag(event.user_id)
     editHomework_flag = db.getUserEditHomewFlag(event.user_id)
     step_code = db.getUserStepCode(event.user_id)
     #
-    if addHomework_flag or delHomework_flag or Homework_flag or getLessonDate_flag or editHomework_flag == True:
+    if addHomework_flag or delHomework_flag or Homework_flag or editHomework_flag == True:  # or getLessonDate_flag
         # Date
         if step_code == 0:
             if Check_Date(msg) == True:
@@ -164,12 +164,12 @@ def differentOperation(event, db, msg):
                         db.changeUserDelHomewFlag(event.user_id, False)
                         delete_Homework(db)
                         Homework.clear_Stack()
-                    elif getLessonDate_flag == True:
-                        msg = get_DateByLesson(db, msg)
-                        db.changeUserStepCode(event.user_id, 0)
-                        db.changeUserGetLessDateFlag(event.user_id, False)
-                        write_msg_withKeyboard(
-                            event.user_id, msg, get_EditingKeyboard())
+                    # elif getLessonDate_flag == True:
+                    #     msg = get_DateByLesson(db, msg)
+                    #     db.changeUserStepCode(event.user_id, 0)
+                    #     db.changeUserGetLessDateFlag(event.user_id, False)
+                    #     write_msg_withKeyboard(
+                    #         event.user_id, msg, get_EditingKeyboard())
                 else:
                     msg = 'Ошибка названия урока: длина не может превышать 16 символов.'
                     write_msg(event.user_id, msg)
@@ -198,7 +198,13 @@ def sendSchedule(db, weekday):
         return
     #
     weekConfig = config_pars.getWeekConfig('Settings.ini')
-    lesson = db.get_Lesson(weekday, weekConfig)
+    if getWeekdayId(weekday) >= datetime.datetime.now().weekday():
+        lesson = db.get_Lesson(weekday, weekConfig)
+    else:
+        if weekConfig == str(1):
+            lesson = db.get_Lesson(weekday, str(2))
+        elif weekConfig == str(2):
+            lesson = db.get_Lesson(weekday, str(1))
     #
     listLessons = []
     rowcount = len(lesson)
@@ -214,6 +220,17 @@ def sendSchedule(db, weekday):
     for row in listLessons:
         msg = msg + '\n' + row
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
+
+
+def getWeekdayId(weekday):
+    weekdays = ['Понедельник', 'Вторник', 'Среда',
+                'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+    idWeekday = 0
+    for w in weekdays:
+        if w == weekday:
+            return idWeekday
+        else:
+            idWeekday += 1
 
 
 def sendHomework(event, db, weekday=None, mode=0, today=False):
@@ -383,36 +400,36 @@ def checkNewLineInTaskText(task):
     return False
 
 
-def get_DateByLesson(db, lesson):
-    weekConfig = config_pars.getWeekConfig('Settings.ini')
-    lessons = db.get_allLesson(weekConfig)
-    #
-    lesson = msg
-    main_list = []
-    for step in range(len(lessons)):
-        if lesson == lessons[step][1]:  # 0 - weekday 1 - lesson
-            weekday = lessons[step][0]
-            date = datetime.datetime.strptime(
-                Homework.get_DateByWeekday(weekday, 1), '%d.%m.%Y')
-            main_list.append([date, weekday])
-    if len(main_list) > 0:
-        now = datetime.datetime.now().replace(
-            hour=0, second=0, microsecond=0, minute=0)
-        idThisWeekday = now.weekday()
-        #
-        for step in main_list:
-            idStepLesson = step[0].weekday()
-            if idStepLesson > idThisWeekday:
-                if step[1] == 'Вторник':
-                    return lesson + ' будет во ' + accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
-                else:
-                    return lesson + ' будет в ' + accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
-        if main_list[0][1] == 'Вторник':
-            return lesson + ' будет во ' + accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
-        else:
-            return lesson + ' будет в ' + accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
-    else:
-        return 'Такой урок не был найден.'
+# def get_DateByLesson(db, lesson):
+#     weekConfig = config_pars.getWeekConfig('Settings.ini')
+#     lessons = db.get_allLesson(weekConfig)
+#     #
+#     #lesson = msg
+#     main_list = []
+#     for step in range(len(lessons)):
+#         if lesson == lessons[step][1]:  # 0 - weekday 1 - lesson
+#             weekday = lessons[step][0]
+#             date = datetime.datetime.strptime(
+#                 Homework.get_DateByWeekday(weekday, 1), '%d.%m.%Y')
+#             main_list.append([date, weekday])
+#     if len(main_list) > 0:
+#         now = datetime.datetime.now().replace(
+#             hour=0, second=0, microsecond=0, minute=0)
+#         idThisWeekday = now.weekday()
+#         #
+#         for step in main_list:
+#             idStepLesson = step[0].weekday()
+#             if idStepLesson > idThisWeekday:
+#                 if step[1] == 'Вторник':
+#                     return lesson + ' будет во ' + accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
+#                 else:
+#                     return lesson + ' будет в ' + accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
+#         if main_list[0][1] == 'Вторник':
+#             return lesson + ' будет во ' + accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
+#         else:
+#             return lesson + ' будет в ' + accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
+#     else:
+#         return 'Такой урок не был найден.'
 
 
 def write_msg(user_id, message):
@@ -447,9 +464,9 @@ def get_EditingKeyboard():
     keyboard.add_button('Удаление домашнего задания',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
-    keyboard.add_button('Когда следующий урок?',
-                        color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
+    # keyboard.add_button('Когда следующий урок?',
+    #                     color=VkKeyboardColor.SECONDARY)
+    # keyboard.add_line()
     keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
     return keyboard
 
@@ -523,7 +540,7 @@ def checkCommand(event, msg):
     Schedule_flag = db.getUserSchedFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
-    getLessDate_flag = db.getUserGetLessDateFlag(event.user_id)
+    #getLessDate_flag = db.getUserGetLessDateFlag(event.user_id)
     editHomework_flag = db.getUserEditHomewFlag(event.user_id)
     #
     if msg == 'Домашнее задание':
@@ -590,9 +607,9 @@ def checkCommand(event, msg):
             Homework.clear_Stack()
             db.changeUserStepCode(event.user_id, 0)
             db.changeUserEditHomewFlag(event.user_id, False)
-        elif getLessDate_flag == True:
-            db.changeUserGetLessDateFlag(event.user_id, False)
-            db.changeUserStepCode(event.user_id, 0)
+        # elif getLessDate_flag == True:
+        #     db.changeUserGetLessDateFlag(event.user_id, False)
+        #     db.changeUserStepCode(event.user_id, 0)
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
     elif msg == 'Начать':
