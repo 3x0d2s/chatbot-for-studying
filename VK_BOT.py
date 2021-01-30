@@ -365,22 +365,28 @@ def delete_Homework(db):
         write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def editHomework(event, msg):
+def editHomework(event, msg):  # проверить полноту команд
     pattern = re.compile('::')
     if pattern.findall(msg):
-        result = None
+        result = ''
         сommand_parts = msg.split('::', maxsplit=1)
         lesson_h = сommand_parts[0]
         task_h = сommand_parts[1]
         #
+        if len(lesson_h) == 0:
+            result += 'Ошибка: вы не указали название урока.\n'
+        if len(task_h) == 0:
+            result += 'Ошибка: вы не указали измененное задание.\n'
         if Check_Lesson(lesson_h) == False:
-            result = 'Ошибка названия урока: длина не может превышать 32 символа.\n'
+            result += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
         if Check_Tasks(task_h) == False:
             result += 'Ошибка текста задания: длина не может превышать 512 символов.\n'
         if result == None:
             date_h = Homework.get_Date()
             db = requestDB('Data Base/db.db')
             if db.check_Homework(date_h, lesson_h) == True:
+                if task_h[0] == '\n':
+                    task_h = task_h.replace('\n', '', 1)
                 db.editHomework(date_h, lesson_h, task_h)
                 db.close()
                 msg = 'Домашнее задание было отредактировано.'
