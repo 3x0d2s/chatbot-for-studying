@@ -120,7 +120,7 @@ class requestDB:
     def get_allHomework(self):
         with self.connection:
             self.cursor.execute(
-                "SELECT compl_date, lesson FROM `homework`")
+                "SELECT compl_date, lesson, task FROM `homework`")
             return self.cursor.fetchall()
 
     def editHomework(self, date, lesson, task):

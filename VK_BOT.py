@@ -31,6 +31,7 @@ def showWeekdays(event, db):
     keyboard = VkKeyboard(one_time=False)
     if Homework_flag == True:
         keyboard.add_button('Указать число', color=VkKeyboardColor.POSITIVE)
+        keyboard.add_button('На неделю', color=VkKeyboardColor.POSITIVE)
         keyboard.add_line()
     if Schedule_flag == True or Homework_flag == True:
         keyboard.add_button('На сегодня', color=VkKeyboardColor.POSITIVE)
@@ -91,6 +92,7 @@ def operTodayOrTomorrow(event, db):
                     sendHomework(event, db, weekdays[0], 2)
                 else:
                     sendHomework(event, db, weekdays[idWeekday + 1], 2)
+            db.changeUserHomewFlag(event.user_id, False)
         elif Schedule_flag == True:
             db.changeUserSchedFlag(event.user_id, False)
             if msg == 'На сегодня':
@@ -135,6 +137,7 @@ def differentOperation(event, db, msg):
                 Homework.set_Date(msg)
                 if Homework_flag == True:
                     sendHomework(event, db, None, 3)
+                    db.changeUserHomewFlag(event.user_id, False)
                 elif addHomework_flag or delHomework_flag == True:
                     db.changeUserStepCode(event.user_id, 1)
                     set_Lesson()
@@ -277,7 +280,7 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
             msg = '📝 Домашнее задание на ' + \
                 accusative(weekday) + ' (' + date + ')' + ':'
             for rows in listHomework:
-                msg = msg + '\n' + rows
+                msg += '\n' + rows
         else:
             if mode == 0:
                 if weekday == 'Понедельник' or weekday == 'Вторник' or weekday == 'Четверг':
@@ -301,7 +304,6 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
     elif weekday == 'Воскресенье':
         msg = 'Домашнее задание на воскресенье? Совсем переучились?'
     Homework.clear_Stack()
-    db.changeUserHomewFlag(event.user_id, False)
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
@@ -397,6 +399,63 @@ def editHomework(event, msg):  # проверить полноту команд
     else:
         msg = 'Ошибка формата команды.'
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
+
+
+#
+# mode:
+# 0 - this week
+# 1 - next week
+def getHomeworkOnWeek(db, mode):
+    allHomework = db.get_allHomework()
+    if mode == 0:
+        output = '📝 Всё домашнее задание до конца этой недели:\n'
+        now = datetime.datetime.now()
+        weekday = now.weekday()
+        #
+        delt = (7 - weekday)
+        dur_days = datetime.timedelta(days=(delt))
+        result = now + dur_days
+        dateStartNextWeek = result.strftime('%d.%m.%Y')
+        dateStartNextWeek = datetime.datetime.strptime(
+            dateStartNextWeek, '%d.%m.%Y')
+        #
+        for row in allHomework:
+            date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
+            if date > now and date < dateStartNextWeek:
+                lesson_name = row[1]
+                task = row[2]
+                if checkNewLineInTaskText(task) == True:
+                    output += str('♦ ' + lesson_name + ':\n' + task + '\n')
+                else:
+                    output += str('♦ ' + lesson_name + ': ' + task + '\n')
+    elif mode == 1:
+        output = '📝 Всё домашнее задание на следующую неделю:\n'
+        now = datetime.datetime.now()
+        weekday = now.weekday()
+        #
+        delt = (7 - weekday)
+        dur_days = datetime.timedelta(days=(delt))
+        result = now + dur_days
+        dateStartNextWeek = result.strftime('%d.%m.%Y')
+        dateStartNextWeek = datetime.datetime.strptime(
+            dateStartNextWeek, '%d.%m.%Y')
+        #
+        dur_days = datetime.timedelta(days=(7))
+        result += dur_days
+        dateStartNextNextWeek = result.strftime('%d.%m.%Y')
+        dateStartNextNextWeek = datetime.datetime.strptime(
+            dateStartNextNextWeek, '%d.%m.%Y')
+        #
+        for row in allHomework:
+            date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
+            if date >= dateStartNextWeek and date < dateStartNextNextWeek:
+                lesson_name = row[1]
+                task = row[2]
+                if checkNewLineInTaskText(task) == True:
+                    output += str('♦ ' + lesson_name + ':\n' + task + '\n')
+                else:
+                    output += str('♦ ' + lesson_name + ': ' + task + '\n')
+    write_msg_withKeyboard(event.user_id, output, get_MainMenuKeyboard(event))
 
 
 def checkNewLineInTaskText(task):
@@ -507,6 +566,17 @@ def userIsAdminCheck(event):
             return users[user][1]  # True or False
 
 
+def HomeworkOnWeekMenu():
+    msg = 'Выберите неделю...'
+    keyboard = VkKeyboard(one_time=False)
+    keyboard.add_button('Эта', color=VkKeyboardColor.SECONDARY)
+    keyboard.add_line()
+    keyboard.add_button('Следующая', color=VkKeyboardColor.SECONDARY)
+    keyboard.add_line()
+    keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
+    write_msg_withKeyboard(event.user_id, msg, keyboard)
+
+
 def getEditCommand(event):
     msg = 'Введите команду в формате (Название урока)::(Обновленное задание). Например Алгебра::Решить номера 150-155'
     keyboard = VkKeyboard(one_time=False)
@@ -557,8 +627,7 @@ def checkCommand(event, msg):
         showWeekdays(event, db)
     elif msg == 'На сегодня' or msg == 'На завтра':
         operTodayOrTomorrow(event, db)
-    elif (msg == 'Понедельник' or msg == 'Вторник' or msg == 'Среда'
-          or msg == 'Четверг' or msg == 'Пятница' or msg == 'Суббота'):
+    elif msg in ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']:
         operWithWeekdays(event, db, msg)
     elif msg == 'В главное меню':
         if Schedule_flag == True:
@@ -573,6 +642,15 @@ def checkCommand(event, msg):
             db.changeUserDelHomewFlag(event.user_id, False)
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
+    elif msg == 'На неделю':
+        if Homework_flag == True:
+            HomeworkOnWeekMenu()
+    elif msg == 'Эта':
+        getHomeworkOnWeek(db, 0)
+        db.changeUserHomewFlag(event.user_id, False)
+    elif msg == 'Следующая':
+        getHomeworkOnWeek(db, 1)
+        db.changeUserHomewFlag(event.user_id, False)
     elif msg == 'Указать число':
         if Homework_flag or addHomework_flag == True:
             set_Date()
@@ -591,11 +669,11 @@ def checkCommand(event, msg):
         if userIsAdminCheck(event) == True:
             db.changeUserDelHomewFlag(event.user_id, True)
             set_Date()
-    elif msg == 'Когда следующий урок?':
-        if userIsAdminCheck(event) == True:
-            db.changeUserGetLessDateFlag(event.user_id, True)
-            db.changeUserStepCode(event.user_id, 1)
-            set_Lesson()
+    # elif msg == 'Когда следующий урок?':
+    #     if userIsAdminCheck(event) == True:
+    #         db.changeUserGetLessDateFlag(event.user_id, True)
+    #         db.changeUserStepCode(event.user_id, 1)
+    #         set_Lesson()
     elif msg == 'Отмена':
         if addHomework_flag == True:
             Homework.clear_Stack()
