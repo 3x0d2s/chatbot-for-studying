@@ -616,8 +616,8 @@ def checkCommand(event, msg):
     Schedule_flag = db.getUserSchedFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
-    #getLessDate_flag = db.getUserGetLessDateFlag(event.user_id)
     editHomework_flag = db.getUserEditHomewFlag(event.user_id)
+    #getLessDate_flag = db.getUserGetLessDateFlag(event.user_id)
     #
     if msg == 'Домашнее задание':
         db.changeUserHomewFlag(event.user_id, True)
