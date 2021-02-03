@@ -399,6 +399,18 @@ def editHomework(event, msg):
 # 1 - next week
 def getHomeworkOnWeek(db, mode):
     allHomework = db.get_allHomework()
+    #
+    if len(allHomework) == 0:
+        if mode == 0:
+            output = 'Домашнее задание на эту неделю не было найдено.'
+            write_msg_withKeyboard(event.user_id, output,
+                                   get_MainMenuKeyboard(event))
+        elif mode == 1:
+            output = 'Домашнее задание на следующую неделю не было найдено.'
+            write_msg_withKeyboard(event.user_id, output,
+                                   get_MainMenuKeyboard(event))
+        return
+    #
     if mode == 0:
         output = '📝 Всё домашнее задание до конца этой недели:\n'
         now = datetime.datetime.now()
@@ -412,14 +424,19 @@ def getHomeworkOnWeek(db, mode):
             dateStartNextWeek, '%d.%m.%Y')
         #
         for row in allHomework:
+            isFind = False
             date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
             if date > now and date < dateStartNextWeek:
+                if isFind == False:
+                    isFind == True
                 lesson_name = row[1]
                 task = row[2]
                 if checkNewLineInTaskText(task) == True:
                     output += str('♦ {0}:\n{1}\n'.format(lesson_name, task))
                 else:
                     output += str('♦ {0}: {1}\n'.format(lesson_name, task))
+            if isFind == False:
+                output = 'Домашнее задание на эту неделю не было найдено.'
     elif mode == 1:
         output = '📝 Всё домашнее задание на следующую неделю:\n'
         now = datetime.datetime.now()
@@ -439,14 +456,19 @@ def getHomeworkOnWeek(db, mode):
             dateStartNextNextWeek, '%d.%m.%Y')
         #
         for row in allHomework:
+            isFind = False
             date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
             if date >= dateStartNextWeek and date < dateStartNextNextWeek:
+                if isFind == False:
+                    isFind == True
                 lesson_name = row[1]
                 task = row[2]
                 if checkNewLineInTaskText(task) == True:
                     output += str('♦ {0}:\n{1}\n'.format(lesson_name, task))
                 else:
                     output += str('♦ {0}: {1}\n'.format(lesson_name, task))
+            if isFind == False:
+                output = 'Домашнее задание на следующую неделю не было найдено.'
     write_msg_withKeyboard(event.user_id, output, get_MainMenuKeyboard(event))
 
 
