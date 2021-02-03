@@ -3,4 +3,4 @@
     Для класса я сделал в базе данных две таблицы с неделями, из-за того, что, например, на одной неделе только история, а на другой в эти же дни обществознание.
 2 - SendSchedule()
 3 - get_DateByLesson()
-3 - File configpars.py (also import)
+4 - File configpars.py (also import)

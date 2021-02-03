@@ -219,9 +219,9 @@ def sendSchedule(db, weekday):
         msg = str('🔹 ' + lesson_name + ' ' + start_time +
                   '-' + end_time + ' | ' + str(cabinet))
         listLessons.append(msg)
-    msg = '📚 Расписание уроков на ' + accusative(weekday) + ':'
+    msg = '📚 Расписание уроков на {0}:'.format(accusative(weekday))
     for row in listLessons:
-        msg = msg + '\n' + row
+        msg += '\n' + row
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
@@ -246,7 +246,6 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
     else:
         Homework.set_Weekday()
         weekday = Homework.get_Weekday()
-    #
     date = Homework.get_Date()
     #
     date_type = datetime.datetime.strptime(date, '%d.%m.%Y')
@@ -255,14 +254,11 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
     delt = now - date_type
     if int(delt.days) > idNowWeekday:
         msg = 'Вы пытаетесь посмотреть домашнее задание на давний срок. В главной базе данных хранятся все домашние \
-               задания начиная с текущей недели. Чтобы всё-же узнать нужное вам домашнее задание, обратитесь к \
+               задания начиная с текущей недели. Чтобы всё-таки узнать нужное вам домашнее задание, обратитесь к \
                администратору - @3x0d2s(Максим Жданов).'
         Homework.clear_Stack()
-        db.changeUserHomewFlag(event.user_id, False)
-        db.close()
         write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
         return
-    #
     #
     if weekday != 'Воскресенье':
         homework_tasks = db.get_Homework(date)
@@ -273,34 +269,30 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
                 lesson_name = homework_tasks[row][0]
                 task = homework_tasks[row][1]
                 if checkNewLineInTaskText(task) == True:
-                    msg = str('♦ ' + lesson_name + ':\n' + task)
+                    msg = str('♦ {0}:\n{1}'.format(lesson_name, task))
                 else:
-                    msg = str('♦ ' + lesson_name + ': ' + task)
+                    msg = str('♦ {0}: {1}'.format(lesson_name, task))
                 listHomework.append(msg)
-            msg = '📝 Домашнее задание на ' + \
-                accusative(weekday) + ' (' + date + ')' + ':'
+            msg = '📝 Домашнее задание на {0} ({1}):'.format(
+                accusative(weekday), date)
             for rows in listHomework:
                 msg += '\n' + rows
         else:
             if mode == 0:
                 if weekday == 'Понедельник' or weekday == 'Вторник' or weekday == 'Четверг':
-                    msg = 'На ближайший ' + weekday.lower() + ' нет домашнего задания.'
+                    msg = 'На ближайший {0} нет домашнего задания.'.format(
+                        weekday.lower())
                 else:
-                    msg = 'На ближайшую ' + \
-                        accusative(weekday).lower() + ' нет домашнего задания.'
+                    msg = 'На ближайшую {0} нет домашнего задания.'.format(
+                        accusative(weekday).lower())
             elif mode == 1:
                 msg = 'На сегодня нет домашнего задания.'
             elif mode == 2:
                 msg = 'На завтра нет домашнего задания.'
             elif mode == 3:
                 if weekday == 'Понедельник' or weekday == 'Вторник' or weekday == 'Четверг':
-                    msg = 'На ' + \
-                        accusative(weekday).lower() + ' ' + \
-                        date + ' нет домашнего задания.'
-                else:
-                    msg = 'На ' + \
-                        accusative(weekday).lower() + ' ' + \
-                        date + ' нет домашнего задания.'
+                    msg = 'На {0} {1} нет домашнего задания.'.format(
+                        accusative(weekday).lower(), date)
     elif weekday == 'Воскресенье':
         msg = 'Домашнее задание на воскресенье? Совсем переучились?'
     Homework.clear_Stack()
@@ -367,7 +359,7 @@ def delete_Homework(db):
         write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def editHomework(event, msg):  # проверить полноту команд
+def editHomework(event, msg):
     pattern = re.compile('::')
     if pattern.findall(msg):
         result = ''
@@ -425,9 +417,9 @@ def getHomeworkOnWeek(db, mode):
                 lesson_name = row[1]
                 task = row[2]
                 if checkNewLineInTaskText(task) == True:
-                    output += str('♦ ' + lesson_name + ':\n' + task + '\n')
+                    output += str('♦ {0}:\n{1}\n'.format(lesson_name, task))
                 else:
-                    output += str('♦ ' + lesson_name + ': ' + task + '\n')
+                    output += str('♦ {0}: {1}\n'.format(lesson_name, task))
     elif mode == 1:
         output = '📝 Всё домашнее задание на следующую неделю:\n'
         now = datetime.datetime.now()
@@ -452,9 +444,9 @@ def getHomeworkOnWeek(db, mode):
                 lesson_name = row[1]
                 task = row[2]
                 if checkNewLineInTaskText(task) == True:
-                    output += str('♦ ' + lesson_name + ':\n' + task + '\n')
+                    output += str('♦ {0}:\n{1}\n'.format(lesson_name, task))
                 else:
-                    output += str('♦ ' + lesson_name + ': ' + task + '\n')
+                    output += str('♦ {0}: {1}\n'.format(lesson_name, task))
     write_msg_withKeyboard(event.user_id, output, get_MainMenuKeyboard(event))
 
 
