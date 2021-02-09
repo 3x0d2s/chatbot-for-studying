@@ -48,6 +48,14 @@ class Homework:
             elif mode == 1:
                 return date
 
+    def get_WeekdayByDate(self, date):
+        # idWeekday = datetime.datetime.strptime(
+        #     self.date, '%d.%m.%Y').weekday()
+        idWeekday = date.weekday()
+        weekdays = ['Понедельник', 'Вторник', 'Среда',
+                    'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+        return weekdays[idWeekday]
+
     def set_Date(self, Date):
         self.date = Date
         self.set_Weekday()

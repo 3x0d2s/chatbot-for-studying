@@ -180,6 +180,7 @@ def differentOperation(event, db, msg):
             # Task
             elif step_code == 2:
                 if Check_Tasks(msg) == True:
+                    msg = msg.replace('''&quot;''', '''"''')
                     Homework.set_Task(msg)
                     db.changeUserStepCode(event.user_id, 0)
                     db.changeUserAddHomewFlag(event.user_id, False)
@@ -269,9 +270,9 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
                 lesson_name = homework_tasks[row][0]
                 task = homework_tasks[row][1]
                 if checkNewLineInTaskText(task) == True:
-                    msg = str('♦ {0}:\n{1}'.format(lesson_name, task))
+                    msg = str('🔺 {0}:\n{1}'.format(lesson_name, task))
                 else:
-                    msg = str('♦ {0}: {1}'.format(lesson_name, task))
+                    msg = str('🔺 {0}: {1}'.format(lesson_name, task))
                 listHomework.append(msg)
             msg = '📝 Домашнее задание на {0} ({1}):'.format(
                 accusative(weekday), date)
@@ -393,11 +394,10 @@ def editHomework(event, msg):
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
-#
-# mode:
-# 0 - this week
-# 1 - next week
 def getHomeworkOnWeek(db, mode):
+    ''' mode:
+        0 - this week
+        1 - next week'''
     allHomework = db.get_allHomework()
     #
     if len(allHomework) == 0:
@@ -423,20 +423,23 @@ def getHomeworkOnWeek(db, mode):
         dateStartNextWeek = datetime.datetime.strptime(
             dateStartNextWeek, '%d.%m.%Y')
         #
+        isFind = False
         for row in allHomework:
-            isFind = False
             date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
             if date > now and date < dateStartNextWeek:
                 if isFind == False:
-                    isFind == True
+                    isFind = True
+                weekday_h = Homework.get_WeekdayByDate(date)
                 lesson_name = row[1]
                 task = row[2]
                 if checkNewLineInTaskText(task) == True:
-                    output += str('♦ {0}:\n{1}\n'.format(lesson_name, task))
+                    output += str('🔺 {0} на {1}:\n{2}\n'.format(lesson_name,
+                                                                accusative(weekday_h), task))
                 else:
-                    output += str('♦ {0}: {1}\n'.format(lesson_name, task))
-            if isFind == False:
-                output = 'Домашнее задание на эту неделю не было найдено.'
+                    output += str('🔺 {0} на {1}: {2}\n'.format(lesson_name,
+                                                               accusative(weekday_h), task))
+        if isFind == False:
+            output = 'Домашнее задание на эту неделю не было найдено.'
     elif mode == 1:
         output = '📝 Всё домашнее задание на следующую неделю:\n'
         now = datetime.datetime.now()
@@ -455,20 +458,23 @@ def getHomeworkOnWeek(db, mode):
         dateStartNextNextWeek = datetime.datetime.strptime(
             dateStartNextNextWeek, '%d.%m.%Y')
         #
+        isFind = False
         for row in allHomework:
-            isFind = False
             date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
             if date >= dateStartNextWeek and date < dateStartNextNextWeek:
                 if isFind == False:
-                    isFind == True
+                    isFind = True
+                weekday_h = Homework.get_WeekdayByDate(date)
                 lesson_name = row[1]
                 task = row[2]
                 if checkNewLineInTaskText(task) == True:
-                    output += str('♦ {0}:\n{1}\n'.format(lesson_name, task))
+                    output += str('🔺 {0} на {1}:\n{2}\n'.format(lesson_name,
+                                                                accusative(weekday_h), task))
                 else:
-                    output += str('♦ {0}: {1}\n'.format(lesson_name, task))
-            if isFind == False:
-                output = 'Домашнее задание на следующую неделю не было найдено.'
+                    output += str('🔺 {0} на {1}: {2}\n'.format(lesson_name,
+                                                               accusative(weekday_h), task))
+        if isFind == False:
+            output = 'Домашнее задание на следующую неделю не было найдено.'
     write_msg_withKeyboard(event.user_id, output, get_MainMenuKeyboard(event))
 
 
