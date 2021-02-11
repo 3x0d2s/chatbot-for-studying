@@ -126,7 +126,6 @@ def differentOperation(event, db, msg):
     Homework_flag = db.getUserHomewFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
-    # getLessonDate_flag = db.getUserGetLessDateFlag(event.user_id)
     editHomework_flag = db.getUserEditHomewFlag(event.user_id)
     step_code = db.getUserStepCode(event.user_id)
     #
@@ -167,12 +166,6 @@ def differentOperation(event, db, msg):
                         db.changeUserDelHomewFlag(event.user_id, False)
                         delete_Homework(db)
                         Homework.clear_Stack()
-                    # elif getLessonDate_flag == True:
-                    #     msg = get_DateByLesson(db, msg)
-                    #     db.changeUserStepCode(event.user_id, 0)
-                    #     db.changeUserGetLessDateFlag(event.user_id, False)
-                    #     write_msg_withKeyboard(
-                    #         event.user_id, msg, get_EditingKeyboard())
                 else:
                     msg = 'Ошибка названия урока: длина не может превышать 16 символов.'
                     write_msg(event.user_id, msg)
@@ -413,6 +406,7 @@ def getHomeworkOnWeek(db, mode):
     #
     if mode == 0:
         output = '📝 Всё домашнее задание до конца этой недели:\n'
+        list_h = []
         now = datetime.datetime.now()
         weekday = now.weekday()
         #
@@ -423,25 +417,32 @@ def getHomeworkOnWeek(db, mode):
         dateStartNextWeek = datetime.datetime.strptime(
             dateStartNextWeek, '%d.%m.%Y')
         #
-        isFind = False
         for row in allHomework:
             date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
             if date > now and date < dateStartNextWeek:
-                if isFind == False:
-                    isFind = True
                 weekday_h = Homework.get_WeekdayByDate(date)
                 lesson_name = row[1]
                 task = row[2]
-                if checkNewLineInTaskText(task) == True:
-                    output += str('🔺 {0} на {1}:\n{2}\n'.format(lesson_name,
-                                                                accusative(weekday_h), task))
-                else:
-                    output += str('🔺 {0} на {1}: {2}\n'.format(lesson_name,
-                                                               accusative(weekday_h), task))
-        if isFind == False:
-            output = 'Домашнее задание на эту неделю не было найдено.'
+                list_h.append([date, lesson_name, weekday_h, task])
+        if len(list_h) == 0:
+            output = 'Домашнее задание на следующую неделю не было найдено.'
+        else:
+            weekdays = ['Понедельник', 'Вторник', 'Среда',
+                        'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+            homew_goto = []
+            for i in range(7):
+                for homew in list_h:
+                    if homew[2] == weekdays[i] and homew not in homew_goto:
+                        if checkNewLineInTaskText(task) == True:
+                            output += str('🔺 {0} на {1}:\n{2}\n'.format(
+                                homew[1], accusative(homew[2]).lower(), homew[3]))
+                        else:
+                            output += str('🔺 {0} на {1}: {2}\n'.format(
+                                homew[1], accusative(homew[2]).lower(), homew[3]))
+                        homew_goto.append(homew)
     elif mode == 1:
         output = '📝 Всё домашнее задание на следующую неделю:\n'
+        list_h = []
         now = datetime.datetime.now()
         weekday = now.weekday()
         #
@@ -458,23 +459,30 @@ def getHomeworkOnWeek(db, mode):
         dateStartNextNextWeek = datetime.datetime.strptime(
             dateStartNextNextWeek, '%d.%m.%Y')
         #
-        isFind = False
         for row in allHomework:
             date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
             if date >= dateStartNextWeek and date < dateStartNextNextWeek:
-                if isFind == False:
-                    isFind = True
                 weekday_h = Homework.get_WeekdayByDate(date)
                 lesson_name = row[1]
                 task = row[2]
-                if checkNewLineInTaskText(task) == True:
-                    output += str('🔺 {0} на {1}:\n{2}\n'.format(lesson_name,
-                                                                accusative(weekday_h), task))
-                else:
-                    output += str('🔺 {0} на {1}: {2}\n'.format(lesson_name,
-                                                               accusative(weekday_h), task))
-        if isFind == False:
+                list_h.append([date, lesson_name, weekday_h, task])
+        #
+        if len(list_h) == 0:
             output = 'Домашнее задание на следующую неделю не было найдено.'
+        else:
+            weekdays = ['Понедельник', 'Вторник', 'Среда',
+                        'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+            homew_goto = []
+            for i in range(7):
+                for homew in list_h:
+                    if homew[2] == weekdays[i] and homew not in homew_goto:
+                        if checkNewLineInTaskText(task) == True:
+                            output += str('🔺 {0} на {1}:\n{2}\n'.format(
+                                homew[1], accusative(homew[2]).lower(), homew[3]))
+                        else:
+                            output += str('🔺 {0} на {1}: {2}\n'.format(
+                                homew[1], accusative(homew[2]).lower(), homew[3]))
+                        homew_goto.append(homew)
     write_msg_withKeyboard(event.user_id, output, get_MainMenuKeyboard(event))
 
 
@@ -483,38 +491,6 @@ def checkNewLineInTaskText(task):
     if pattern.findall(task):
         return True
     return False
-
-
-# def get_DateByLesson(db, lesson):
-#     weekConfig = config_pars.getWeekConfig('Settings.ini')
-#     lessons = db.get_allLesson(weekConfig)
-#     #
-#     #lesson = msg
-#     main_list = []
-#     for step in range(len(lessons)):
-#         if lesson == lessons[step][1]:  # 0 - weekday 1 - lesson
-#             weekday = lessons[step][0]
-#             date = datetime.datetime.strptime(
-#                 Homework.get_DateByWeekday(weekday, 1), '%d.%m.%Y')
-#             main_list.append([date, weekday])
-#     if len(main_list) > 0:
-#         now = datetime.datetime.now().replace(
-#             hour=0, second=0, microsecond=0, minute=0)
-#         idThisWeekday = now.weekday()
-#         #
-#         for step in main_list:
-#             idStepLesson = step[0].weekday()
-#             if idStepLesson > idThisWeekday:
-#                 if step[1] == 'Вторник':
-#                     return lesson + ' будет во ' + accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
-#                 else:
-#                     return lesson + ' будет в ' + accusative(step[1]) + ' (' + str(step[0].strftime('%d.%m.%Y')) + ')'
-#         if main_list[0][1] == 'Вторник':
-#             return lesson + ' будет во ' + accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
-#         else:
-#             return lesson + ' будет в ' + accusative(main_list[0][1]) + ' (' + str(main_list[0][0].strftime('%d.%m.%Y')) + ')'
-#     else:
-#         return 'Такой урок не был найден.'
 
 
 def write_msg(user_id, message):
@@ -549,9 +525,6 @@ def get_EditingKeyboard():
     keyboard.add_button('Удаление домашнего задания',
                         color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
-    # keyboard.add_button('Когда следующий урок?',
-    #                     color=VkKeyboardColor.SECONDARY)
-    # keyboard.add_line()
     keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
     return keyboard
 
@@ -689,11 +662,6 @@ def checkCommand(event, msg):
         if userIsAdminCheck(event) == True:
             db.changeUserDelHomewFlag(event.user_id, True)
             set_Date()
-    # elif msg == 'Когда следующий урок?':
-    #     if userIsAdminCheck(event) == True:
-    #         db.changeUserGetLessDateFlag(event.user_id, True)
-    #         db.changeUserStepCode(event.user_id, 1)
-    #         set_Lesson()
     elif msg == 'Отмена':
         if addHomework_flag == True:
             Homework.clear_Stack()
@@ -711,9 +679,6 @@ def checkCommand(event, msg):
             Homework.clear_Stack()
             db.changeUserStepCode(event.user_id, 0)
             db.changeUserEditHomewFlag(event.user_id, False)
-        # elif getLessDate_flag == True:
-        #     db.changeUserGetLessDateFlag(event.user_id, False)
-        #     db.changeUserStepCode(event.user_id, 0)
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
     elif msg == 'Начать':
