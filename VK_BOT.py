@@ -369,12 +369,13 @@ def editHomework(event, msg):
             result += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
         if Check_Tasks(task_h) == False:
             result += 'Ошибка текста задания: длина не может превышать 512 символов.\n'
-        if result == None:
+        if result == '':
             date_h = Homework.get_Date()
             db = requestDB('Data Base/db.db')
             if db.check_Homework(date_h, lesson_h) == True:
                 if task_h[0] == '\n':
                     task_h = task_h.replace('\n', '', 1)
+                task_h = task_h.replace('''&quot;''', '''"''')
                 db.editHomework(date_h, lesson_h, task_h)
                 db.close()
                 msg = 'Домашнее задание было отредактировано.'
@@ -425,7 +426,7 @@ def getHomeworkOnWeek(db, mode):
                 task = row[2]
                 list_h.append([date, lesson_name, weekday_h, task])
         if len(list_h) == 0:
-            output = 'Домашнее задание на следующую неделю не было найдено.'
+            output = 'Домашнее задание на эту неделю не было найдено.'
         else:
             weekdays = ['Понедельник', 'Вторник', 'Среда',
                         'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
