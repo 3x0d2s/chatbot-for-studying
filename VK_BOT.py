@@ -24,7 +24,7 @@ def showWeekdays(event, db):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     #
     if Homework_flag or addHomework_flag == True:
-        msg = 'Выберите день недели или укажите дату...'
+        msg = 'Выберите...'
     else:
         msg = 'Выберите день недели...'
     #
@@ -129,7 +129,7 @@ def differentOperation(event, db, msg):
     editHomework_flag = db.getUserEditHomewFlag(event.user_id)
     step_code = db.getUserStepCode(event.user_id)
     #
-    if addHomework_flag or delHomework_flag or Homework_flag or editHomework_flag == True:  # or getLessonDate_flag
+    if addHomework_flag or delHomework_flag or Homework_flag or editHomework_flag == True:
         # Date
         if step_code == 0:
             if Check_Date(msg) == True:
@@ -561,11 +561,11 @@ def userIsAdminCheck(event):
 
 
 def HomeworkOnWeekMenu():
-    msg = 'Выберите неделю...'
+    msg = 'Выберите...'
     keyboard = VkKeyboard(one_time=False)
-    keyboard.add_button('Эта', color=VkKeyboardColor.SECONDARY)
+    keyboard.add_button('На эту', color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
-    keyboard.add_button('Следующая', color=VkKeyboardColor.SECONDARY)
+    keyboard.add_button('На следующую', color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     write_msg_withKeyboard(event.user_id, msg, keyboard)
@@ -611,7 +611,6 @@ def checkCommand(event, msg):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
     editHomework_flag = db.getUserEditHomewFlag(event.user_id)
-    #getLessDate_flag = db.getUserGetLessDateFlag(event.user_id)
     #
     if msg == 'Домашнее задание':
         db.changeUserHomewFlag(event.user_id, True)
@@ -639,10 +638,10 @@ def checkCommand(event, msg):
     elif msg == 'На неделю':
         if Homework_flag == True:
             HomeworkOnWeekMenu()
-    elif msg == 'Эта':
+    elif msg == 'На эту':
         getHomeworkOnWeek(db, 0)
         db.changeUserHomewFlag(event.user_id, False)
-    elif msg == 'Следующая':
+    elif msg == 'На следующую':
         getHomeworkOnWeek(db, 1)
         db.changeUserHomewFlag(event.user_id, False)
     elif msg == 'Указать число':
