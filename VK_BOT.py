@@ -5,6 +5,7 @@ import datetime
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+from loguru import logger
 from request_db import requestDB
 from homework_opers import Homework
 from check_InputData import *
@@ -15,6 +16,9 @@ session_api = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
 Homework = Homework()
 users = None
+#
+logger.add('Debug.log', format="{time} {level} {message}",
+           level="DEBUG", rotation="1 week", compression="zip")
 #
 
 
@@ -230,6 +234,7 @@ def getWeekdayId(weekday):
             idWeekday += 1
 
 
+@logger.catch
 def sendHomework(event, db, weekday=None, mode=0, today=False):
     if weekday != None:
         if today == True:
@@ -293,6 +298,7 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
+@logger.catch
 def set_Homework(db):
     date = Homework.get_Date()
     weekDay = Homework.get_Weekday()
