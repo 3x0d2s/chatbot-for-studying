@@ -17,11 +17,16 @@ def delete_OldHomework():
     if rowcount > 0:
         now = datetime.datetime.now().replace(
             hour=0, second=0, microsecond=0, minute=0)
+        delt = 7 + datetime.datetime.now().weekday()
+        dur_days = datetime.timedelta(days=(delt))
+        dStartLastWeek = now - dur_days
+        #
         for row in range(rowcount):
             date = allHomework[row][0]
             homew_date = datetime.datetime.strptime(
                 date, '%d.%m.%Y')
-            if now > homew_date:
+            #
+            if homew_date < dStartLastWeek:
                 lesson = allHomework[row][1]
                 db.del_Homework(date, lesson)
                 if wasItDeleted == False:
