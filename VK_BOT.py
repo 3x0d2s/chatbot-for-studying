@@ -236,6 +236,7 @@ def getWeekdayId(weekday):
 
 @logger.catch
 def sendHomework(event, db, weekday=None, mode=0, today=False):
+    msg = ''
     if weekday != None:
         if today == True:
             now = datetime.datetime.now().strftime('%d.%m.%Y')
@@ -290,6 +291,9 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
                 msg = 'На завтра нет домашнего задания.'
             elif mode == 3:
                 if weekday == 'Понедельник' or weekday == 'Вторник' or weekday == 'Четверг':
+                    msg = 'На {0} {1} нет домашнего задания.'.format(
+                        weekday.lower(), date)
+                else:
                     msg = 'На {0} {1} нет домашнего задания.'.format(
                         accusative(weekday).lower(), date)
     elif weekday == 'Воскресенье':
