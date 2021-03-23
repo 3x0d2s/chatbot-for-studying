@@ -242,15 +242,18 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
     else:
         Homework.set_Weekday()
         weekday = Homework.get_Weekday()
-    date = Homework.get_Date()
     #
+    date = Homework.get_Date()
     date_type = datetime.datetime.strptime(date, '%d.%m.%Y')
-    now = datetime.datetime.now()
-    idNowWeekday = now.weekday()
-    delt = now - date_type
-    if int(delt.days) > idNowWeekday:
+    #
+    now = datetime.datetime.now().replace(
+        hour=0, second=0, microsecond=0, minute=0)
+    delt = 7 + datetime.datetime.now().weekday()
+    dur_days = datetime.timedelta(days=(delt))
+    dStartLastWeek = now - dur_days
+    if dStartLastWeek > date_type:
         msg = 'Вы пытаетесь посмотреть домашнее задание на давний срок. В главной базе данных хранятся все домашние \
-               задания начиная с текущей недели. Чтобы всё-таки узнать нужное вам домашнее задание, обратитесь к \
+               задания начиная с прошлой недели недели. Чтобы всё-таки узнать нужное вам домашнее задание, можете обратиться к \
                администратору - @3x0d2s(Максим Жданов).'
         Homework.clear_Stack()
         write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
