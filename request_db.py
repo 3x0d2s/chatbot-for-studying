@@ -123,10 +123,15 @@ class requestDB:
                 "SELECT compl_date, lesson, task FROM `homework`")
             return self.cursor.fetchall()
 
-    def editHomework(self, date, lesson, task):
+    def editTaskForHomework(self, date, lesson, task):
         with self.connection:
             return self.cursor.execute(
                 "UPDATE homework SET task=? WHERE compl_date=? AND lesson=?", (task, date, lesson))
+
+    def editDateForHomework(self, old_date, lesson, new_date):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE homework SET compl_date=? WHERE compl_date=? AND lesson=?", (new_date, old_date, lesson))
 
     def add_user(self, user_id):
         with self.connection:

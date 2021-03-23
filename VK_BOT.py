@@ -27,10 +27,7 @@ def showWeekdays(event, db):
     Schedule_flag = db.getUserSchedFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     #
-    if Homework_flag or addHomework_flag == True:
-        msg = 'Выберите...'
-    else:
-        msg = 'Выберите день недели...'
+    msg = 'Выберите...'
     #
     keyboard = VkKeyboard(one_time=False)
     if Homework_flag == True:
@@ -234,7 +231,6 @@ def getWeekdayId(weekday):
             idWeekday += 1
 
 
-@logger.catch
 def sendHomework(event, db, weekday=None, mode=0, today=False):
     msg = ''
     if weekday != None:
@@ -363,13 +359,18 @@ def delete_Homework(db):
         write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
+@logger.catch
 def editHomework(event, msg):
-    pattern = re.compile('::')
-    if pattern.findall(msg):
+    pattern_1 = re.compile('::')  # For change task
+    pattern_2 = re.compile('@@')  # For change date
+    if pattern_1.findall(msg):
         result = ''
         сommand_parts = msg.split('::', maxsplit=1)
         lesson_h = сommand_parts[0]
         task_h = сommand_parts[1]
+        if task_h[0] == '\n':
+            task_h = task_h.replace('\n', '', 1)
+        task_h = task_h.replace('''&quot;''', '''"''')
         #
         if len(lesson_h) == 0:
             result += 'Ошибка: вы не указали название урока.\n'
@@ -383,14 +384,37 @@ def editHomework(event, msg):
             date_h = Homework.get_Date()
             db = requestDB('Data Base/db.db')
             if db.check_Homework(date_h, lesson_h) == True:
-                if task_h[0] == '\n':
-                    task_h = task_h.replace('\n', '', 1)
-                task_h = task_h.replace('''&quot;''', '''"''')
-                db.editHomework(date_h, lesson_h, task_h)
-                db.close()
+                db.editTaskForHomework(date_h, lesson_h, task_h)
                 msg = 'Домашнее задание было отредактировано.'
             else:
                 msg = 'Указанное домашнее задание не существует.'
+            db.close()
+        else:
+            msg = result
+    elif pattern_2.findall(msg):
+        result = ''
+        сommand_parts = msg.split('@@', maxsplit=1)
+        lesson_h = сommand_parts[0]
+        date_h_new = сommand_parts[1]
+        date_h_new = date_h_new.replace(' ', '')
+        #
+        if len(lesson_h) == 0:
+            result += 'Ошибка: вы не указали название урока.\n'
+        if len(date_h_new) == 0:
+            result += 'Ошибка: вы не указали новую дату.\n'
+        if Check_Lesson(lesson_h) == False:
+            result += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
+        if Check_Date(date_h_new) == False:
+            result += 'Ошибка даты: неверный формат.\n'
+        if result == '':
+            date_h_old = Homework.get_Date()
+            db = requestDB('Data Base/db.db')
+            if db.check_Homework(date_h_old, lesson_h) == True:
+                db.editDateForHomework(date_h_old, lesson_h, date_h_new)
+                msg = 'Домашнее задание было отредактировано.'
+            else:
+                msg = 'Указанное домашнее задание не существует.'
+            db.close()
         else:
             msg = result
     else:
@@ -582,7 +606,7 @@ def HomeworkOnWeekMenu():
 
 
 def getEditCommand(event):
-    msg = 'Введите команду в формате (Название урока)::(Обновленное задание). Например Алгебра::Решить номера 150-155'
+    msg = 'Введите команду в формате:\n🔺 Для изменения задания:\n(Название урока)::(Новое задание)\n🔺 Для изменения даты:\n(Название урока)@@(Новая дата)'
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     write_msg_withKeyboard(event.user_id, msg, keyboard)
