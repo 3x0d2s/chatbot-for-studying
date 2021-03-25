@@ -3,13 +3,15 @@ import os
 import datetime
 from request_db import requestDB
 import config_pars
-
-
-FILE = 'Data Base/db.db'
+import pathlib
+#
+PATH = str(pathlib.Path(__file__).parent.absolute())
+FILE = PATH + '/Data Base/db.db'
+#
 
 
 def delete_OldHomework():
-    db = requestDB('Data Base/db.db')
+    db = requestDB(FILE)
     allHomework = db.get_allHomework()
     wasItDeleted = False
     #
@@ -39,15 +41,15 @@ def delete_OldHomework():
     db.close()
 
 
-if not os.path.isdir('Data Base/Backups'):
-    os.mkdir('Data Base/Backups')
+if not os.path.isdir(PATH + '/Data Base/Backups'):
+    os.mkdir(PATH + '/Data Base/Backups')
 
 
 if os.path.isfile(FILE):
-    shutil.copy(FILE, 'Data Base/Backups/db_' +
+    shutil.copy(FILE, PATH + '/Data Base/Backups/db_' +
                 datetime.datetime.now().strftime('%d-%m-%Y') + '.db')
     status = delete_OldHomework()
-    logfile = open('Data Base/log.txt', 'a', encoding='utf-8')
+    logfile = open(PATH + '/Data Base/log.txt', 'a', encoding='utf-8')
     if status == True:
         logfile.write('[' + str(datetime.datetime.now()) +
                       '] - Cоздан бэкап базы данных, старое домашнее задание очищено.\n')
@@ -56,9 +58,9 @@ if os.path.isfile(FILE):
                       '] - Cоздан бэкап базы данных, старое домашнее задание не было найдено.\n')
     logfile.close()
 else:
-    logfile = open('Data Base/log.txt', 'a', encoding='utf-8')
+    logfile = open(PATH + '/Data Base/log.txt', 'a', encoding='utf-8')
     logfile.write('[' + str(datetime.datetime.now()) +
                   '] - Ошибка бэкапа: отсуствует файл БД.\n')
     logfile.close()
 
-config_pars.changeWeekConfig('Settings.ini')
+config_pars.changeWeekConfig(PATH + '/Settings.ini')
