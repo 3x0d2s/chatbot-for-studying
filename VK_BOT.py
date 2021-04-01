@@ -598,14 +598,22 @@ def userIsAdminCheck(event):
 
 
 def HomeworkOnWeekMenu():
-    msg = 'Выберите...'
-    keyboard = VkKeyboard(one_time=False)
-    keyboard.add_button('На эту', color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
-    keyboard.add_button('На следующую', color=VkKeyboardColor.SECONDARY)
-    keyboard.add_line()
-    keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
-    write_msg_withKeyboard(event.user_id, msg, keyboard)
+    date_now = datetime.datetime.now()
+    weekday_now = Homework.get_WeekdayByDate(date_now)
+    if weekday_now not in ('Суббота', 'Воскресенье'):
+        msg = 'Выберите...'
+        keyboard = VkKeyboard(one_time=False)
+        keyboard.add_button('На эту', color=VkKeyboardColor.SECONDARY)
+        keyboard.add_line()
+        keyboard.add_button('На следующую', color=VkKeyboardColor.SECONDARY)
+        keyboard.add_line()
+        keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
+        write_msg_withKeyboard(event.user_id, msg, keyboard)
+    else:
+        db = requestDB('Data Base/db.db')
+        getHomeworkOnWeek(db, 1)
+        db.changeUserHomewFlag(event.user_id, False)
+        db.close()
 
 
 def getEditCommand(event):

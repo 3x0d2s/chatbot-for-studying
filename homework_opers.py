@@ -49,8 +49,6 @@ class Homework:
                 return date
 
     def get_WeekdayByDate(self, date):
-        # idWeekday = datetime.datetime.strptime(
-        #     self.date, '%d.%m.%Y').weekday()
         idWeekday = date.weekday()
         weekdays = ['Понедельник', 'Вторник', 'Среда',
                     'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
