@@ -253,7 +253,7 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
     dStartLastWeek = now - dur_days
     if dStartLastWeek > date_type:
         msg = 'Вы пытаетесь посмотреть домашнее задание на давний срок. В главной базе данных хранятся все домашние \
-               задания начиная с прошлой недели недели. Чтобы всё-таки узнать нужное вам домашнее задание, можете обратиться к \
+               задания начиная с прошлой недели. Чтобы всё-таки узнать нужное вам домашнее задание, можете обратиться к \
                администратору - @3x0d2s(Максим Жданов).'
         Homework.clear_Stack()
         write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
