@@ -20,6 +20,7 @@ users = None
 logger.add('Debug.log', format="{time} {level} {message}",
            level="DEBUG", rotation="1 week", compression="zip")
 #
+# homew branch
 
 
 def showWeekdays(event, db):
