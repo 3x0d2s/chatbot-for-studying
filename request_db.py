@@ -8,6 +8,11 @@ class requestDB:
         self.connection = sqlite3.connect(database, check_same_thread=False)
         self.cursor = self.connection.cursor()
 
+    def changeHomw(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE homework SET lesson=? WHERE admin_id=?", (value, user_id))
+
     def getUser(self, user_id):
         with self.connection:
             self.cursor.execute(
@@ -147,9 +152,9 @@ class requestDB:
             self.cursor.execute("SELECT * FROM `users`")
             return self.cursor.fetchall()
 
-    def add_Homework(self, date, weekDay, lesson, task):
+    def add_Homework(self, admin_id, date, weekDay, lesson, task):
         with self.connection:
-            return self.cursor.execute("INSERT INTO `homework` (`compl_date`, 'weekday', 'lesson', 'task') VALUES(?,?,?,?)", (date, weekDay, lesson, task))
+            return self.cursor.execute("INSERT INTO `homework` (`admin_id`, `compl_date`, 'weekday', 'lesson', 'task') VALUES(?,?,?,?,?)", (admin_id, date, weekDay, lesson, task))
 
     def del_Homework(self, date, lesson):
         with self.connection:
