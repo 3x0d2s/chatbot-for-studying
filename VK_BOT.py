@@ -7,14 +7,12 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from loguru import logger
 from request_db import requestDB
-from homework_opers import Homework
 from check_InputData import *
 import config_pars
 #
 vk_session = vk_api.VkApi(token=config.token)
 session_api = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
-Homework = Homework()
 users = None
 #
 logger.add('Debug.log', format="{time} {level} {message}",
@@ -70,7 +68,9 @@ def operWithWeekdays(event, db, msg):
         sendSchedule(db, msg)
         db.changeUserSchedFlag(event.user_id, False)
     elif addHomework_flag == True or delHomework_flag == True:
-        Homework.set_Weekday(msg)
+        weekday = msg
+        date = get_DateByWeekday(weekday)
+        db.add_HomeworkObjectToStack(event.user_id, date, weekday, '', '')
         db.changeUserStepCode(event.user_id, (step_code + 1))
         set_Lesson()
 
@@ -105,9 +105,15 @@ def operTodayOrTomorrow(event, db):
                     sendSchedule(db, weekdays[idWeekday + 1])
         elif addHomework_flag == True:
             if idWeekday == 6:
-                Homework.set_Weekday(weekdays[0])
+                weekday = weekdays[0]
+                date = get_DateByWeekday(weekday)
+                db.add_HomeworkObjectToStack(
+                    event.user_id, date, weekday, '', '')
             else:
-                Homework.set_Weekday(weekdays[idWeekday + 1])
+                weekday = weekdays[idWeekday + 1]
+                date = get_DateByWeekday(weekday)
+                db.add_HomeworkObjectToStack(
+                    event.user_id, date, weekday, '', '')
             db.changeUserStepCode(event.user_id, 1)
             set_Lesson()
 
@@ -123,6 +129,52 @@ def accusative(weekday):
         return weekday
 
 
+def set_Weekday(user_id, db, value=None):
+    if value == None:
+        date = db.HomeworkStack_getDate(user_id)
+        idWeekday = datetime.datetime.strptime(date, '%d.%m.%Y').weekday()
+        weekdays = ['Понедельник', 'Вторник', 'Среда',
+                    'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+        db.HomeworkStack_setWeekday(user_id, weekdays[idWeekday])
+    else:
+        db.HomeworkStack_setWeekday(user_id, value)
+        date = get_DateByWeekday(value)
+        db.HomeworkStack_setDate(user_id, value)
+
+
+def get_DateByWeekday(weekday):
+    weekdays = ['Понедельник', 'Вторник', 'Среда',
+                'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+    idSecondWeekday = 0
+    for w in weekdays:
+        if w == weekday:
+            break
+        else:
+            idSecondWeekday += 1
+    now = datetime.datetime.now()
+    idThisWeekday = now.weekday()
+    #
+    if idSecondWeekday <= idThisWeekday:
+        delt = (6 - idThisWeekday) + idSecondWeekday
+        dur_days = datetime.timedelta(days=(delt + 1))
+        result = now + dur_days
+        date = result.strftime('%d.%m.%Y')
+        return date
+    elif idSecondWeekday > idThisWeekday:
+        delt = idSecondWeekday - idThisWeekday
+        dur_days = datetime.timedelta(days=delt)
+        result = now + dur_days
+        date = result.strftime('%d.%m.%Y')
+        return date
+
+
+def get_WeekdayByDate(date):
+    idWeekday = date.weekday()
+    weekdays = ['Понедельник', 'Вторник', 'Среда',
+                'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+    return weekdays[idWeekday]
+
+
 def differentOperation(event, db, msg):
     Homework_flag = db.getUserHomewFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
@@ -134,14 +186,15 @@ def differentOperation(event, db, msg):
         # Date
         if step_code == 0:
             if Check_Date(msg) == True:
-                Homework.set_Date(msg)
+                db.add_HomeworkObjectToStack(event.user_id, msg, '', '', '')
+                set_Weekday(event.user_id, db)
                 if Homework_flag == True:
                     sendHomework(event, db, None, 3)
                     db.changeUserHomewFlag(event.user_id, False)
                 elif addHomework_flag or delHomework_flag == True:
                     db.changeUserStepCode(event.user_id, 1)
                     set_Lesson()
-                else:
+                elif editHomework_flag == True:
                     db.changeUserStepCode(event.user_id, 1)
                     getEditCommand(event)
             else:
@@ -152,21 +205,21 @@ def differentOperation(event, db, msg):
             # Lesson
             if step_code == 1:
                 if editHomework_flag == True:
-                    editHomework(event, msg)
-                    Homework.clear_Stack()
+                    editHomework(event, db, msg)
+                    db.del_HomeworkObjectFromStack(event.user_id)
                     db.changeUserStepCode(event.user_id, 0)
                     db.changeUserEditHomewFlag(event.user_id, False)
                 elif Check_Lesson(msg) == True:
                     if addHomework_flag == True:
-                        Homework.set_Lesson(msg)
+                        db.HomeworkStack_setLesson(event.user_id, msg)
                         db.changeUserStepCode(event.user_id, 2)
                         set_Task()
                     elif delHomework_flag == True:
-                        Homework.set_Lesson(msg)
+                        db.HomeworkStack_setLesson(event.user_id, msg)
                         db.changeUserStepCode(event.user_id, 0)
                         db.changeUserDelHomewFlag(event.user_id, False)
-                        delete_Homework(db)
-                        Homework.clear_Stack()
+                        delete_Homework(event.user_id, db)
+                        db.del_HomeworkObjectFromStack(event.user_id)
                 else:
                     msg = 'Ошибка названия урока: длина не может превышать 16 символов.'
                     write_msg(event.user_id, msg)
@@ -175,11 +228,11 @@ def differentOperation(event, db, msg):
             elif step_code == 2:
                 if Check_Tasks(msg) == True:
                     msg = msg.replace('''&quot;''', '''"''')
-                    Homework.set_Task(msg)
+                    db.HomeworkStack_setTask(event.user_id, msg)
                     db.changeUserStepCode(event.user_id, 0)
                     db.changeUserAddHomewFlag(event.user_id, False)
-                    set_Homework(db)
-                    Homework.clear_Stack()
+                    set_Homework(event.user_id, db)
+                    db.del_HomeworkObjectFromStack(event.user_id)
                 else:
                     msg = 'Ошибка задач: длина не может превышать 512 символов.'
                     write_msg(event.user_id, msg)
@@ -233,17 +286,17 @@ def getWeekdayId(weekday):
 
 def sendHomework(event, db, weekday=None, mode=0, today=False):
     msg = ''
+    date = None
+    #
     if weekday != None:
         if today == True:
-            now = datetime.datetime.now().strftime('%d.%m.%Y')
-            Homework.set_Date(str(now))
+            date = datetime.datetime.now().strftime('%d.%m.%Y')
         else:
-            Homework.get_DateByWeekday(weekday)
+            date = get_DateByWeekday(weekday)
     else:
-        Homework.set_Weekday()
-        weekday = Homework.get_Weekday()
+        date = db.HomeworkStack_getDate(event.user_id)
+        weekday = db.HomeworkStack_getWeekday(event.user_id)
     #
-    date = Homework.get_Date()
     date_type = datetime.datetime.strptime(date, '%d.%m.%Y')
     #
     now = datetime.datetime.now().replace(
@@ -255,7 +308,7 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
         msg = 'Вы пытаетесь посмотреть домашнее задание на давний срок. В главной базе данных хранятся все домашние \
                задания начиная с прошлой недели недели. Чтобы всё-таки узнать нужное вам домашнее задание, можете обратиться к \
                администратору - @3x0d2s(Максим Жданов).'
-        Homework.clear_Stack()
+        db.del_HomeworkObjectFromStack(event.user_id)
         write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
         return
     #
@@ -297,16 +350,16 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
                         accusative(weekday).lower(), date)
     elif weekday == 'Воскресенье':
         msg = 'Домашнее задание на воскресенье? Совсем переучились?'
-    Homework.clear_Stack()
+    db.del_HomeworkObjectFromStack(event.user_id)
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
 @logger.catch
-def set_Homework(db):
-    date = Homework.get_Date()
-    weekDay = Homework.get_Weekday()
-    lesson = Homework.get_Lesson()
-    task = Homework.get_Task()
+def set_Homework(user_id, db):
+    date = db.HomeworkStack_getDate(user_id)
+    weekDay = db.HomeworkStack_getWeekday(user_id)
+    lesson = db.HomeworkStack_getLesson(user_id)
+    task = db.HomeworkStack_getTask(user_id)
     #
     if weekDay == 'Воскресенье':
         msg = 'Домашнее задание на воскресенье? Может не надо?'
@@ -343,13 +396,12 @@ def set_Homework(db):
         write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def delete_Homework(db):
-    date = Homework.get_Date()
-    lesson = Homework.get_Lesson()
+def delete_Homework(user_id, db):
+    date = db.HomeworkStack_getDate(user_id)
+    lesson = db.HomeworkStack_getLesson(user_id)
     #
     if db.check_Homework(date, lesson) == True:
         db.del_Homework(date, lesson)
-        db.close()
         msg = 'Домашнее задание удалено!'
         write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
     else:
@@ -363,7 +415,7 @@ def delete_Homework(db):
 
 
 @logger.catch
-def editHomework(event, msg):
+def editHomework(event, db, msg):
     pattern_1 = re.compile('::')  # For change task
     pattern_2 = re.compile('@@')  # For change date
     if pattern_1.findall(msg):
@@ -384,14 +436,13 @@ def editHomework(event, msg):
         if Check_Tasks(task_h) == False:
             result += 'Ошибка текста задания: длина не может превышать 512 символов.\n'
         if result == '':
-            date_h = Homework.get_Date()
-            db = requestDB('Data Base/db.db')
+            date_h = db.HomeworkStack_getDate(
+                event.user_id)
             if db.check_Homework(date_h, lesson_h) == True:
                 db.editTaskForHomework(date_h, lesson_h, task_h)
                 msg = 'Домашнее задание было отредактировано.'
             else:
                 msg = 'Указанное домашнее задание не существует.'
-            db.close()
         else:
             msg = result
     elif pattern_2.findall(msg):
@@ -410,7 +461,8 @@ def editHomework(event, msg):
         if Check_Date(date_h_new) == False:
             result += 'Ошибка даты: неверный формат.\n'
         if result == '':
-            date_h_old = Homework.get_Date()
+            date_h_old = db.HomeworkStack_getDate(
+                event.user_id)
             db = requestDB('Data Base/db.db')
             if db.check_Homework(date_h_old, lesson_h) == True:
                 db.editDateForHomework(date_h_old, lesson_h, date_h_new)
@@ -458,7 +510,7 @@ def getHomeworkOnWeek(db, mode):
         for row in allHomework:
             date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
             if date > now and date < dateStartNextWeek:
-                weekday_h = Homework.get_WeekdayByDate(date)
+                weekday_h = get_WeekdayByDate(date)
                 lesson_name = row[1]
                 task = row[2]
                 list_h.append([date, lesson_name, weekday_h, task])
@@ -500,7 +552,7 @@ def getHomeworkOnWeek(db, mode):
         for row in allHomework:
             date = datetime.datetime.strptime(row[0], '%d.%m.%Y')
             if date >= dateStartNextWeek and date < dateStartNextNextWeek:
-                weekday_h = Homework.get_WeekdayByDate(date)
+                weekday_h = get_WeekdayByDate(date)
                 lesson_name = row[1]
                 task = row[2]
                 list_h.append([date, lesson_name, weekday_h, task])
@@ -599,7 +651,7 @@ def userIsAdminCheck(event):
 
 def HomeworkOnWeekMenu():
     date_now = datetime.datetime.now()
-    weekday_now = Homework.get_WeekdayByDate(date_now)
+    weekday_now = get_WeekdayByDate(date_now)
     if weekday_now not in ('Суббота', 'Воскресенье'):
         msg = 'Выберите...'
         keyboard = VkKeyboard(one_time=False)
@@ -673,10 +725,10 @@ def checkCommand(event, msg):
         elif Homework_flag == True:
             db.changeUserHomewFlag(event.user_id, False)
         elif addHomework_flag == True:
-            Homework.clear_Stack()
+            db.del_HomeworkObjectFromStack(event.user_id)
             db.changeUserAddHomewFlag(event.user_id, False)
         elif delHomework_flag == True:
-            Homework.clear_Stack()
+            db.del_HomeworkObjectFromStack(event.user_id)
             db.changeUserDelHomewFlag(event.user_id, False)
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_MainMenuKeyboard(event))
@@ -709,19 +761,19 @@ def checkCommand(event, msg):
             set_Date()
     elif msg == 'Отмена':
         if addHomework_flag == True:
-            Homework.clear_Stack()
+            db.del_HomeworkObjectFromStack(event.user_id)
             db.changeUserAddHomewFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
         elif delHomework_flag == True:
-            Homework.clear_Stack()
+            db.del_HomeworkObjectFromStack(event.user_id)
             db.changeUserDelHomewFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
         elif Homework_flag == True:
-            Homework.clear_Stack()
+            db.del_HomeworkObjectFromStack(event.user_id)
             db.changeUserHomewFlag(event.user_id, False)
             db.changeUserStepCode(event.user_id, 0)
         elif editHomework_flag == True:
-            Homework.clear_Stack()
+            db.del_HomeworkObjectFromStack(event.user_id)
             db.changeUserStepCode(event.user_id, 0)
             db.changeUserEditHomewFlag(event.user_id, False)
         write_msg_withKeyboard(

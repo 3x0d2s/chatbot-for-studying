@@ -142,19 +142,66 @@ class requestDB:
         with self.connection:
             return self.cursor.execute("INSERT INTO `users` (`user_id`) VALUES(?) ", (user_id,))
 
-    def get_admins(self):
-        with self.connection:
-            self.cursor.execute("SELECT * FROM `admins`")
-            return self.cursor.fetchall()
-
     def get_users(self):
         with self.connection:
             self.cursor.execute("SELECT * FROM `users`")
             return self.cursor.fetchall()
 
-    def add_Homework(self, admin_id, date, weekDay, lesson, task):
+    def add_HomeworkObjectToStack(self, user_id, date, weekDay, lesson, task):  # STACK
         with self.connection:
-            return self.cursor.execute("INSERT INTO `homework` (`admin_id`, `compl_date`, 'weekday', 'lesson', 'task') VALUES(?,?,?,?,?)", (admin_id, date, weekDay, lesson, task))
+            return self.cursor.execute("INSERT INTO `homework_stack` (`user_id`, `compl_date`, 'weekday', 'lesson', 'task') VALUES(?,?,?,?,?)", (user_id, date, weekDay, lesson, task))
+
+    def HomeworkStack_setDate(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE homework_stack SET compl_date=? WHERE user_id=?", (value, user_id))
+
+    def HomeworkStack_setWeekday(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE homework_stack SET weekday=? WHERE user_id=?", (value, user_id))
+
+    def HomeworkStack_setLesson(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE homework_stack SET lesson=? WHERE user_id=?", (value, user_id))
+
+    def HomeworkStack_setTask(self, user_id, value):
+        with self.connection:
+            return self.cursor.execute(
+                "UPDATE homework_stack SET task=? WHERE user_id=?", (value, user_id))
+
+    def HomeworkStack_getDate(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT compl_date FROM homework_stack WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def HomeworkStack_getWeekday(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT weekday FROM homework_stack WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def HomeworkStack_getLesson(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT lesson FROM homework_stack WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def HomeworkStack_getTask(self, user_id):
+        with self.connection:
+            self.cursor.execute(
+                "SELECT task FROM homework_stack WHERE user_id=?", (user_id,))
+            return (self.cursor.fetchall())[0][0]
+
+    def del_HomeworkObjectFromStack(self, user_id):
+        with self.connection:
+            return self.cursor.execute("DELETE FROM `homework_stack` WHERE user_id=?", (user_id,))
+
+    def add_Homework(self, date, weekDay, lesson, task):
+        with self.connection:
+            return self.cursor.execute("INSERT INTO `homework` (`compl_date`, 'weekday', 'lesson', 'task') VALUES(?,?,?,?)", (date, weekDay, lesson, task))
 
     def del_Homework(self, date, lesson):
         with self.connection:
