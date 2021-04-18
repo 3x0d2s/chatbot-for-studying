@@ -8,17 +8,6 @@ class requestDB:
         self.connection = sqlite3.connect(database, check_same_thread=False)
         self.cursor = self.connection.cursor()
 
-    def changeHomw(self, user_id, value):
-        with self.connection:
-            return self.cursor.execute(
-                "UPDATE homework SET lesson=? WHERE admin_id=?", (value, user_id))
-
-    def getUser(self, user_id):
-        with self.connection:
-            self.cursor.execute(
-                "SELECT * FROM `users` WHERE user_id=?", (user_id,))
-            return self.cursor.fetchall()
-
     def getUserHomewFlag(self, user_id):
         with self.connection:
             self.cursor.execute(
@@ -104,16 +93,6 @@ class requestDB:
             elif weekConfig == '2':
                 self.cursor.execute(
                     "SELECT * FROM `schedule_2` WHERE weekday IN (?)", (weekday, ))
-            return self.cursor.fetchall()
-
-    def get_allLesson(self, weekConfig):
-        with self.connection:
-            if weekConfig == '1':
-                self.cursor.execute(
-                    "SELECT weekday, lesson_name FROM `schedule_1`")
-            elif weekConfig == '2':
-                self.cursor.execute(
-                    "SELECT weekday, lesson_name FROM `schedule_2`")
             return self.cursor.fetchall()
 
     def get_Homework(self, date):
