@@ -186,6 +186,8 @@ def differentOperation(event, db, msg):
         # Date
         if step_code == 0:
             if Check_Date(msg) == True:
+                if len(msg) == 9:
+                    msg = '0' + msg
                 db.add_HomeworkObjectToStack(event.user_id, msg, '', '', '')
                 set_Weekday(event.user_id, db)
                 if Homework_flag == True:
@@ -451,6 +453,8 @@ def editHomework(event, db, msg):
         lesson_h = сommand_parts[0]
         date_h_new = сommand_parts[1]
         date_h_new = date_h_new.replace(' ', '')
+        if len(date_h_new) == 9:
+            date_h_new = '0' + date_h_new
         #
         if len(lesson_h) == 0:
             result += 'Ошибка: вы не указали название урока.\n'
