@@ -353,7 +353,6 @@ def sendHomework(event, db, weekday=None, mode=0, today=False):
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
-@logger.catch
 def set_Homework(user_id, db):
     date = db.HomeworkStack_getDate(user_id)
     weekDay = db.HomeworkStack_getWeekday(user_id)
@@ -413,7 +412,6 @@ def delete_Homework(user_id, db):
         write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-@logger.catch
 def editHomework(event, db, msg):
     result_text = ''
     error = True
@@ -423,7 +421,7 @@ def editHomework(event, db, msg):
         сommand_parts = msg.split('::', maxsplit=1)
         lesson_h = сommand_parts[0]
         task_h = сommand_parts[1]
-        if task_h[0] == '\n':
+        if len(task_h) != 0 and task_h[0] == '\n':
             task_h = task_h.replace('\n', '', 1)
         task_h = task_h.replace('''&quot;''', '''"''')
         #
@@ -707,6 +705,7 @@ def set_Task():
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
+@logger.catch
 def checkCommand(event, msg):
     db = requestDB('Data Base/db.db')
     Homework_flag = db.getUserHomewFlag(event.user_id)
