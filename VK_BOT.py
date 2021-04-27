@@ -208,9 +208,6 @@ def differentOperation(event, db, msg):
             if step_code == 1:
                 if editHomework_flag == True:
                     editHomework(event, db, msg)
-                    db.del_HomeworkObjectFromStack(event.user_id)
-                    db.changeUserStepCode(event.user_id, 0)
-                    db.changeUserEditHomewFlag(event.user_id, False)
                 elif Check_Lesson(msg) == True:
                     if addHomework_flag == True:
                         db.HomeworkStack_setLesson(event.user_id, msg)
@@ -418,10 +415,11 @@ def delete_Homework(user_id, db):
 
 @logger.catch
 def editHomework(event, db, msg):
+    result_text = ''
+    error = True
     pattern_1 = re.compile('::')  # For change task
     pattern_2 = re.compile('@@')  # For change date
     if pattern_1.findall(msg):
-        result = ''
         сommand_parts = msg.split('::', maxsplit=1)
         lesson_h = сommand_parts[0]
         task_h = сommand_parts[1]
@@ -430,25 +428,23 @@ def editHomework(event, db, msg):
         task_h = task_h.replace('''&quot;''', '''"''')
         #
         if len(lesson_h) == 0:
-            result += 'Ошибка: вы не указали название урока.\n'
+            result_text += 'Ошибка: вы не указали название урока.\n'
         if len(task_h) == 0:
-            result += 'Ошибка: вы не указали измененное задание.\n'
+            result_text += 'Ошибка: вы не указали измененное задание.\n'
         if Check_Lesson(lesson_h) == False:
-            result += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
+            result_text += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
         if Check_Tasks(task_h) == False:
-            result += 'Ошибка текста задания: длина не может превышать 512 символов.\n'
-        if result == '':
+            result_text += 'Ошибка текста задания: длина не может превышать 512 символов.\n'
+        if result_text == '':
+            error = False
             date_h = db.HomeworkStack_getDate(
                 event.user_id)
             if db.check_Homework(date_h, lesson_h) == True:
                 db.editTaskForHomework(date_h, lesson_h, task_h)
-                msg = 'Домашнее задание было отредактировано.'
+                result_text = 'Домашнее задание было отредактировано.'
             else:
-                msg = 'Указанное домашнее задание не существует.'
-        else:
-            msg = result
+                result_text = 'Указанное домашнее задание не существует.'
     elif pattern_2.findall(msg):
-        result = ''
         сommand_parts = msg.split('@@', maxsplit=1)
         lesson_h = сommand_parts[0]
         date_h_new = сommand_parts[1]
@@ -457,28 +453,34 @@ def editHomework(event, db, msg):
             date_h_new = '0' + date_h_new
         #
         if len(lesson_h) == 0:
-            result += 'Ошибка: вы не указали название урока.\n'
+            result_text += 'Ошибка: вы не указали название урока.\n'
         if len(date_h_new) == 0:
-            result += 'Ошибка: вы не указали новую дату.\n'
+            result_text += 'Ошибка: вы не указали новую дату.\n'
         if Check_Lesson(lesson_h) == False:
-            result += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
+            result_text += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
         if Check_Date(date_h_new) == False:
-            result += 'Ошибка даты: неверный формат.\n'
-        if result == '':
+            result_text += 'Ошибка даты: неверный формат.\n'
+        if result_text == '':
+            error = False
             date_h_old = db.HomeworkStack_getDate(
                 event.user_id)
-            db = requestDB('Data Base/db.db')
             if db.check_Homework(date_h_old, lesson_h) == True:
                 db.editDateForHomework(date_h_old, lesson_h, date_h_new)
-                msg = 'Домашнее задание было отредактировано.'
+                result_text = 'Домашнее задание было отредактировано.'
             else:
-                msg = 'Указанное домашнее задание не существует.'
-            db.close()
-        else:
-            msg = result
+                result_text = 'Указанное домашнее задание не существует.'
     else:
-        msg = 'Ошибка формата команды.'
-    write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
+        result_text = 'Ошибка формата команды.'
+    #
+    if error == True:
+        write_msg(event.user_id, result_text)
+        getEditCommand(event)
+    else: 
+        db.del_HomeworkObjectFromStack(event.user_id)
+        db.changeUserStepCode(event.user_id, 0)
+        db.changeUserEditHomewFlag(event.user_id, False)
+        write_msg_withKeyboard(event.user_id, result_text, get_MainMenuKeyboard(event))
+
 
 
 def getHomeworkOnWeek(db, mode):
