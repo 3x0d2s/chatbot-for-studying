@@ -28,7 +28,7 @@
         <li><a href="#Настройка">Настройка</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#Испольование">Испольование</a></li>
     <li><a href="#Лицензия">Лицензия</a></li>
     <li><a href="#Контакты">Контакты</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
@@ -81,7 +81,7 @@
 
 
 <!-- USAGE EXAMPLES -->
-## Применение
+## Испольование
 
 ![exam_img](https://user-images.githubusercontent.com/58226124/116445943-1d305b80-a85f-11eb-9c9d-f6d3bc67766f.png)
 
