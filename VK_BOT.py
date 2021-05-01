@@ -9,6 +9,7 @@ from loguru import logger
 from request_db import requestDB
 from check_InputData import *
 import config_pars
+import os
 #
 vk_session = vk_api.VkApi(token=config.token)
 session_api = vk_session.get_api()
@@ -473,12 +474,12 @@ def editHomework(event, db, msg):
     if error == True:
         write_msg(event.user_id, result_text)
         getEditCommand(event)
-    else: 
+    else:
         db.del_HomeworkObjectFromStack(event.user_id)
         db.changeUserStepCode(event.user_id, 0)
         db.changeUserEditHomewFlag(event.user_id, False)
-        write_msg_withKeyboard(event.user_id, result_text, get_MainMenuKeyboard(event))
-
+        write_msg_withKeyboard(event.user_id, result_text,
+                               get_MainMenuKeyboard(event))
 
 
 def getHomeworkOnWeek(db, mode):
@@ -792,9 +793,15 @@ def checkCommand(event, msg):
 
 
 if __name__ == '__main__':
+    # Create a Data Base from a dump file if db.db isn't exists
+    if not os.path.isfile('Data Base/db.db'):
+        from request_db import createBD_FromDump
+        createBD_FromDump()
+    #
     db = requestDB('Data Base/db.db')
     getUsers(db)
     db.close()
+    #
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:

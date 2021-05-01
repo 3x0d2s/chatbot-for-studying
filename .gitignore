@@ -1,10 +1,9 @@
 /__pycache__/
 /.vscode/
-/Data Base/
-/vk-tech-bot/
 
 /config.py
 /Settings.ini
 /.VK_BOT.py.swp
 /*.zip
 /Debug.log
+/Data Base/db.db

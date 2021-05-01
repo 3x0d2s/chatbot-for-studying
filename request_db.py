@@ -1,6 +1,13 @@
 import sqlite3
 
 
+def createBD_FromDump():
+    cur = sqlite3.connect('Data Base/db.db')
+    f = open('Data Base/db_dump.sql', 'r')
+    dump = f.read()
+    cur.executescript(dump)
+
+
 class requestDB:
 
     def __init__(self, database):
