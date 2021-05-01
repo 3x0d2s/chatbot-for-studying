@@ -1,11 +1,13 @@
-import shutil
 import os
+import shutil
 import datetime
-from request_db import requestDB
-import config_pars
 import pathlib
 #
+from request_db import requestDB
+import config_pars
+#
 PATH = str(pathlib.Path(__file__).parent.absolute())
+PATH = os.path.normpath(PATH + os.sep + os.pardir)
 FILE = PATH + '/Data Base/db.db'
 #
 
@@ -47,7 +49,7 @@ if not os.path.isdir(PATH + '/Data Base/Backups'):
 
 if os.path.isfile(FILE):
     shutil.copy(FILE, PATH + '/Data Base/Backups/db_' +
-                datetime.datetime.now().strftime('%d-%m-%Y') + '.db')
+                datetime.datetime.now().strftime('%Y-%m-%d') + '.db')
     status = delete_OldHomework()
     logfile = open(PATH + '/Data Base/log.txt', 'a', encoding='utf-8')
     if status == True:
@@ -63,4 +65,4 @@ else:
                   '] - Ошибка бэкапа: отсуствует файл БД.\n')
     logfile.close()
 
-config_pars.changeWeekConfig(PATH + '/Settings.ini')
+config_pars.changeWeekConfig('/Settings/Settings.ini')

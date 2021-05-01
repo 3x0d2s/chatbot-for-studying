@@ -1,17 +1,17 @@
 #
 import re
-import config
 import datetime
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from loguru import logger
-from request_db import requestDB
-from check_InputData import *
-import config_pars
+import Settings.config
+from Scripts.request_db import requestDB
+from Scripts.check_InputData import *
+import Scripts.config_pars
 import os
 #
-vk_session = vk_api.VkApi(token=config.token)
+vk_session = vk_api.VkApi(token=Settings.config.token)
 session_api = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
 users = None
@@ -248,7 +248,7 @@ def sendSchedule(db, weekday):
         write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
         return
     #
-    weekConfig = config_pars.getWeekConfig('Settings.ini')
+    weekConfig = Scripts.config_pars.getWeekConfig('/Settings/Settings.ini')
     if getWeekdayId(weekday) >= datetime.datetime.now().weekday():
         lesson = db.get_Lesson(weekday, weekConfig)
     else:
@@ -795,7 +795,7 @@ def checkCommand(event, msg):
 if __name__ == '__main__':
     # Create a Data Base from a dump file if db.db isn't exists
     if not os.path.isfile('Data Base/db.db'):
-        from request_db import createBD_FromDump
+        from Scripts.request_db import createBD_FromDump
         createBD_FromDump()
     #
     db = requestDB('Data Base/db.db')
