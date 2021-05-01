@@ -1,15 +1,17 @@
 #
 import re
+import os
 import datetime
+#
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from loguru import logger
+#
 import Settings.config
 from Scripts.request_db import requestDB
 from Scripts.check_InputData import *
 import Scripts.config_pars
-import os
 #
 vk_session = vk_api.VkApi(token=Settings.config.token)
 session_api = vk_session.get_api()
