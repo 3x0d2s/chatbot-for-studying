@@ -5,6 +5,7 @@
 /Data Base/Backups/
 
 # Files
+/Settings/config.py
 /Settings/Settings.ini
 /.VK_BOT.py.swp
 /*.zip
