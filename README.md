@@ -24,14 +24,14 @@
     <li>
       <a href="#Начало-работы">Начало работы</a>
       <ul>
-        <li><a href="#Необходимые-библиотеки">Необходимые библиотеки</a></li>
+        <li><a href="#Установка-необходимых-библиотек">Необходимые библиотеки</a></li>
         <li><a href="#Настройка">Настройка</a></li>
+        <li><a href="#Добавление-администратора">Добавление администратора</a></li>
       </ul>
     </li>
     <li><a href="#Испольование">Испольование</a></li>
     <li><a href="#Лицензия">Лицензия</a></li>
     <li><a href="#Контакты">Контакты</a></li>
-    <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
 
@@ -48,46 +48,51 @@
 
 ### Разработано с помощью
 
-* [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI)
+* [vk_api](https://github.com/python273/vk_api)
 * [Loguru ](https://github.com/Delgan/loguru)
 
 <!-- GETTING STARTED -->
 ## Начало работы
 
-Это пример того, как вы можете настроить проект локально. Чтобы запустить локальную копию, следуйте этим простым примерам действий.
+Это пример того, как вы можете локально настроить проект. Чтобы запустить бота, следуйте этим простым указаниям.
 
-### Необходимые библиотеки
+### Установка необходимых библиотек
 
-* Установка pyTelegramBotAPI
+* Установка vk_api
   ```sh
-  $ pip install pyTelegramBotAPI
+  $ pip3 install vk_api
   ```
 * Установка Loguru
   ```sh
-  $ pip install loguru
+  $ pip3 install loguru
   ```
 
-### Настройка
+### Настройка и запуск
 
 1. Клонируйте репозиторий
    ```sh
    $ git clone https://github.com/3x0d2s/Chatbot-For-Studying.git
    ```
-2. Введите API-Token вашего бота в файл config.py
+2. Раскомментируйте первую строку и введите API-Token вашего бота в файле /Settings/initial_config.py. Вот так должно получиться:
    ```PY
-   token = 'ENTER YOUR API-Token'
+   token = 'YOUR-API-Token'
+   ```
+3. Переименуйте файл initial_config.py в файл config.py
+4. Запустите файл VK_BOT.py
+   ```sh
+   $ python3 VK_BOT.py
    ```
 
-
+### Добавление администратора
+Чтобы сделать определённого пользователя администратором, в базе данных в таблице "users" необходимо у этого пользователя изменить значение флага "isAdmin" - замените "0" на "1". 
 
 <!-- USAGE EXAMPLES -->
 ## Испольование
 
-![exam_img](https://user-images.githubusercontent.com/58226124/116445943-1d305b80-a85f-11eb-9c9d-f6d3bc67766f.png)
+![example_img](https://user-images.githubusercontent.com/58226124/116445943-1d305b80-a85f-11eb-9c9d-f6d3bc67766f.png)
 
 <!-- LICENSE -->
 ## Лицензия
-
 Распространяется по лицензии MIT. См. `LICENSE.md` для дополнительной иформации.
 
 
