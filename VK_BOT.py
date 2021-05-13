@@ -121,7 +121,7 @@ def operTodayOrTomorrow(event, db):
             set_Lesson()
 
 
-def accusative(weekday):
+def accusative(weekday) -> str:
     if weekday == 'Среда':
         return 'Среду'
     elif weekday == 'Пятница':
@@ -145,7 +145,7 @@ def set_Weekday(user_id, db, value=None):
         db.HomeworkStack_setDate(user_id, value)
 
 
-def get_DateByWeekday(weekday):
+def get_DateByWeekday(weekday: str) -> str:
     weekdays = ['Понедельник', 'Вторник', 'Среда',
                 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
     idSecondWeekday = 0
@@ -171,7 +171,7 @@ def get_DateByWeekday(weekday):
         return date
 
 
-def get_WeekdayByDate(date):
+def get_WeekdayByDate(date: datetime.datetime) -> str:
     idWeekday = date.weekday()
     weekdays = ['Понедельник', 'Вторник', 'Среда',
                 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
@@ -275,7 +275,7 @@ def sendSchedule(db, weekday):
     write_msg_withKeyboard(event.user_id, msg, get_MainMenuKeyboard(event))
 
 
-def getWeekdayId(weekday):
+def getWeekdayId(weekday) -> int:
     weekdays = ['Понедельник', 'Вторник', 'Среда',
                 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
     idWeekday = 0
@@ -583,7 +583,7 @@ def getHomeworkOnWeek(db, mode):
     write_msg_withKeyboard(event.user_id, output, get_MainMenuKeyboard(event))
 
 
-def checkNewLineInTaskText(task):
+def checkNewLineInTaskText(task) -> bool:
     pattern = re.compile(r'\n')
     if pattern.findall(task):
         return True
@@ -600,7 +600,7 @@ def write_msg_withKeyboard(user_id, message, keyboard):
                                         'random_id': 0, 'keyboard': keyboard.get_keyboard()})
 
 
-def get_MainMenuKeyboard(event):
+def get_MainMenuKeyboard(event) -> VkKeyboard:
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Расписание', color=VkKeyboardColor.POSITIVE)
     keyboard.add_button('Домашнее задание', color=VkKeyboardColor.POSITIVE)
@@ -611,7 +611,7 @@ def get_MainMenuKeyboard(event):
     return keyboard
 
 
-def get_EditingKeyboard():
+def get_EditingKeyboard() -> VkKeyboard:
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Добавить домашнее задание',
                         color=VkKeyboardColor.SECONDARY)
@@ -649,7 +649,7 @@ def checkUser(event):
     db.close()
 
 
-def userIsAdminCheck(event):
+def userIsAdminCheck(event) -> bool:
     user_id = event.user_id
     for user in range(len(users)):
         if user_id == users[user][0]:
