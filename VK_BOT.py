@@ -8,17 +8,15 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from loguru import logger
 #
-import config.config
+import config.config as config
 from Scripts.request_db import requestDB
 from Scripts.check_InputData import *
 import Scripts.config_pars
 #
-vk_session = vk_api.VkApi(token=config.config.token)
+vk_session = vk_api.VkApi(token=config.token)
 session_api = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
 users = None
-#
-PATH_DB = '/db/db.db'
 #
 logger.add('Debug.log', format="{time} {level} {message}",
            level="DEBUG", rotation="1 week", compression="zip")
@@ -638,7 +636,7 @@ def get_users(db):
 
 
 def check_user(event):
-    db = requestDB(PATH_DB)
+    db = requestDB(config.PATH_DB)
     if len(users) != 0:
         newUser = True
         user_id = event.user_id
@@ -675,7 +673,7 @@ def homework_on_week_menu():
         keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
         write_msg_withKeyboard(event.user_id, msg, keyboard)
     else:
-        db = requestDB(PATH_DB)
+        db = requestDB(config.PATH_DB)
         get_homework_on_week(db, 1)
         db.changeUserHomewFlag(event.user_id, False)
         db.close()
@@ -716,7 +714,7 @@ def set_task():
 
 @logger.catch
 def check_command(event, msg):
-    db = requestDB(PATH_DB)
+    db = requestDB(config.PATH_DB)
     Homework_flag = db.getUserHomewFlag(event.user_id)
     Schedule_flag = db.getUserSchedFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
@@ -802,11 +800,11 @@ def check_command(event, msg):
 
 if __name__ == '__main__':
     # Create a Data Base from a dump file if db.db isn't exists
-    if not os.path.isfile(PATH_DB):
+    if not os.path.isfile(config.PATH_DB):
         from Scripts.request_db import createBD_FromDump
-        createBD_FromDump()
+        createBD_FromDump(config.PATH_DB, config.PATH_DUMP)
     #
-    db = requestDB(PATH_DB)
+    db = requestDB(config.PATH_DB)
     get_users(db)
     db.close()
     #
