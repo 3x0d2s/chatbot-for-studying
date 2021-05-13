@@ -80,7 +80,7 @@
    ```sh
    $ git clone https://github.com/3x0d2s/Chatbot-For-Studying.git
    ```
-2. Раскомментируйте первую строку и введите API-Token вашего бота в файле `/Settings/initial_config.py`. Вот так должно получиться:
+2. Раскомментируйте первую строку и введите API-Token вашего бота в файле `/config/initial_config.py`. Вот так должно получиться:
    ```PY
    token = 'YOUR-API-Token'
    ```
