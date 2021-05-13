@@ -9,9 +9,9 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from loguru import logger
 #
 import config.config as config
-from Scripts.request_db import requestDB
-from Scripts.check_InputData import *
-import Scripts.config_pars
+from scripts.request_db import requestDB
+from scripts.check_InputData import *
+import scripts.config_pars
 #
 vk_session = vk_api.VkApi(token=config.token)
 session_api = vk_session.get_api()
@@ -251,7 +251,7 @@ def send_schedule(db, weekday):
             event.user_id, msg, get_main_menu_keyboard(event))
         return
     #
-    weekConfig = Scripts.config_pars.getWeekConfig('/Settings/Settings.ini')
+    weekConfig = scripts.config_pars.getWeekConfig('/Settings/Settings.ini')
     if get_weekday_id(weekday) >= datetime.datetime.now().weekday():
         lesson = db.get_Lesson(weekday, weekConfig)
     else:
@@ -801,7 +801,7 @@ def check_command(event, msg):
 if __name__ == '__main__':
     # Create a Data Base from a dump file if db.db isn't exists
     if not os.path.isfile(config.PATH_DB):
-        from Scripts.request_db import createBD_FromDump
+        from scripts.request_db import createBD_FromDump
         createBD_FromDump(config.PATH_DB, config.PATH_DUMP)
     #
     db = requestDB(config.PATH_DB)
