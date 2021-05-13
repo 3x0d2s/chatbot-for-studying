@@ -1,9 +1,9 @@
 import sqlite3
 
 
-def createBD_FromDump():
-    cur = sqlite3.connect("/db/db.db")
-    f = open('Data Base/db_dump.sql', 'r')
+def createBD_FromDump(path_db, path_dump):
+    cur = sqlite3.connect(path_db)
+    f = open(path_dump, 'r')
     dump = f.read()
     cur.executescript(dump)
 
