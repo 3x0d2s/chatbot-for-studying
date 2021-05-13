@@ -1,8 +1,7 @@
 # Directories
-/__pycache__/
-/*/__pycache__/
+**/__pycache__/
 /.vscode/
-/Data Base/Backups/
+/db/Backups/
 
 # Files
 /config/config.py
@@ -10,5 +9,5 @@
 /.VK_BOT.py.swp
 /*.zip
 /Debug.log
-/Data Base/db.db
-/Data Base/log.txt
+/db/db.db
+/db/log.txt
