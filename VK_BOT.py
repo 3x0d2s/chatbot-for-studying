@@ -8,12 +8,12 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from loguru import logger
 #
-import Settings.config
+import config.config
 from Scripts.request_db import requestDB
 from Scripts.check_InputData import *
 import Scripts.config_pars
 #
-vk_session = vk_api.VkApi(token=Settings.config.token)
+vk_session = vk_api.VkApi(token=config.config.token)
 session_api = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
 users = None

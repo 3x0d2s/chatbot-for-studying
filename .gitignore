@@ -5,8 +5,8 @@
 /Data Base/Backups/
 
 # Files
-/Settings/config.py
-/Settings/Settings.ini
+/config/config.py
+/config/Settings.ini
 /.VK_BOT.py.swp
 /*.zip
 /Debug.log
