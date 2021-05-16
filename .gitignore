@@ -6,7 +6,7 @@
 # Files
 /config/config.py
 /config/Settings.ini
-/.VK_BOT.py.swp
+/.main.py.swp
 /*.zip
 /Debug.log
 /db/db.db
