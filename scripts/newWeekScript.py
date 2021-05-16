@@ -1,10 +1,16 @@
+#
 import os
+import sys
+#
+sys.path.append(os.getcwd())
+#
 import shutil
 import datetime
 import pathlib
 #
 from request_db import requestDB
 import config_pars
+from config.config import PATH_SETTINGS
 #
 PATH = str(pathlib.Path(__file__).parent.absolute())
 PATH = os.path.normpath(PATH + os.sep + os.pardir)
@@ -65,4 +71,4 @@ else:
                   '] - Ошибка бэкапа: отсуствует файл БД.\n')
     logfile.close()
 
-config_pars.changeWeekConfig('/config/Settings.ini')
+config_pars.changeWeekConfig(PATH_SETTINGS)
