@@ -635,22 +635,26 @@ def get_users(db):
     users = db.get_users()
 
 
-def check_user(event):
-    db = requestDB(config.PATH_DB)
+def check_is_new_user(user_id: int) -> bool:
+    "Проверяет нет ли пользователя в БД."
     if len(users) != 0:
-        newUser = True
-        user_id = event.user_id
-        for user in range(len(users)):
-            if user_id == users[user][0]:
-                newUser = False
+        isNewUser = True
+        for user in users:
+            if user_id == user[0]:
+                isNewUser = False
                 break
-        if newUser == True:
-            db.add_user(event.user_id)
-            get_users(db)
-    else:
-        db.add_user(event.user_id)
-        get_users(db)
-    db.close()
+        return isNewUser
+    else:  # Если пользователь - первый, кто написал боту
+        return True
+
+
+async def user_processing(user_id: int):
+    "Обработка пользователя, запустившего бота."
+    if check_is_new_user(user_id) == True:
+        db = requestDB(config.PATH_DB)
+        db.add_user(user_id)
+        db.close()
+        get_users()
 
 
 def user_is_admin_check(event) -> bool:
@@ -811,6 +815,6 @@ if __name__ == '__main__':
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:
-                check_user(event)
+                user_processing(event)
                 msg = event.text
                 check_command(event, msg)
