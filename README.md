@@ -84,8 +84,11 @@
    ```PY
    token = 'YOUR-API-Token'
    ```
-3. Переименуйте файл `initial_config.py` в файл `config.py`
-4. Запустите файл `VK_BOT.py`
+3. Переименуйте файл `initial_config.py` в файл `config.py` в директории `config/`
+   ```sh
+   $ cp config/initial_config.py config/config.py
+   ```
+5. Запустите файл `main.py`
    ```sh
    $ python3 main.py
    ```
