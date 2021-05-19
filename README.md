@@ -80,13 +80,13 @@
    ```sh
    $ git clone https://github.com/3x0d2s/Chatbot-For-Studying.git
    ```
-2. Раскомментируйте первую строку и введите API-Token вашего бота в файле `/config/initial_config.py`. Вот так должно получиться:
-   ```PY
-   token = 'YOUR-API-Token'
-   ```
-3. Переименуйте файл `initial_config.py` в файл `config.py` в директории `config/`
+2. Скопируйте файл `initial_config.py` в файл `config.py` в директории `config/`
    ```sh
    $ cp config/initial_config.py config/config.py
+   ```
+3. Раскомментируйте первую строку и введите API-Token вашего бота в файле `config/config.py`. Вот так должно получиться:
+   ```PY
+   token = 'YOUR-API-Token'
    ```
 5. Запустите файл `main.py`
    ```sh
