@@ -80,7 +80,7 @@
    ```sh
    $ git clone https://github.com/3x0d2s/Chatbot-For-Studying.git
    ```
-2. Скопируйте файл `initial_config.py` в файл `config.py` в директории `config/`
+2. Скопируйте файл `config/initial_config.py` в файл `config/config.py`
    ```sh
    $ cp config/initial_config.py config/config.py
    ```
