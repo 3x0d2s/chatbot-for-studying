@@ -248,23 +248,21 @@ def send_schedule(event, db, weekday):
     #
     weekConfig = scripts.config_pars.getWeekConfig(config.PATH_SETTINGS)
     if get_weekday_id(weekday) >= datetime.datetime.now().weekday():
-        lesson = db.get_Lesson(weekday, weekConfig)
+        lesson = db.get_Lessons(weekday, weekConfig)
     else:
-        if weekConfig == str(1):
-            lesson = db.get_Lesson(weekday, str(2))
-        elif weekConfig == str(2):
-            lesson = db.get_Lesson(weekday, str(1))
+        if weekConfig == '1':
+            lessons = db.get_Lessons(weekday, '2')
+        elif weekConfig == '2':
+            lessons = db.get_Lessons(weekday, '1')
     #
     listLessons = []
-    rowcount = len(lesson)
-    for row in range(rowcount):
-        start_time = lesson[row][1]
-        end_time = lesson[row][2]
-        lesson_name = lesson[row][3]
-        cabinet = lesson[row][4]
-        msg = str('🔹 ' + lesson_name + ' ' + start_time +
-                  '-' + end_time + ' | ' + str(cabinet))
-        listLessons.append(msg)
+    for lesson in lessons:
+        start_time = lesson[1]
+        end_time = lesson[2]
+        lesson_name = lesson[3]
+        cabinet = lesson[4]
+        lesson_row = f"🔹 {lesson_name} {start_time}-{end_time} | {cabinet}"
+        listLessons.append(lesson_row)
     msg = '📚 Расписание уроков на {0}:'.format(accusative_weekday(weekday))
     for row in listLessons:
         msg += '\n' + row
