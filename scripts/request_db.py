@@ -92,7 +92,7 @@ class requestDB:
             return self.cursor.execute(
                 "UPDATE users SET editHomew_f=? WHERE user_id=?", (value, user_id))
 
-    def get_Lesson(self, weekday, weekConfig):
+    def get_Lessons(self, weekday, weekConfig):
         with self.connection:
             if weekConfig == '1':
                 self.cursor.execute(
