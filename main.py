@@ -77,7 +77,7 @@ def operation_today_or_tomorrow(event, db):
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     msg = event.text
     #
-    if Schedule_flag == True or Homework_flag == True or addHomework_flag == True:
+    if Schedule_flag or Homework_flag or addHomework_flag == True:
         idWeekday = datetime.datetime.now().weekday()
         weekdays = ['Понедельник', 'Вторник', 'Среда',
                     'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
@@ -142,12 +142,7 @@ def set_weekday(user_id, db, value=None):
 def get_date_by_weekday(weekday: str) -> str:
     weekdays = ['Понедельник', 'Вторник', 'Среда',
                 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
-    idSecondWeekday = 0
-    for w in weekdays:
-        if w == weekday:
-            break
-        else:
-            idSecondWeekday += 1
+    idSecondWeekday = weekdays.index(weekday)
     now = datetime.datetime.now()
     idThisWeekday = now.weekday()
     #
