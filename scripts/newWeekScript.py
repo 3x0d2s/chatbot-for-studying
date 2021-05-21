@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 #
 from config.config import PATH_SETTINGS
 import config_pars

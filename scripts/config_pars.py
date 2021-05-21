@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+#
 import configparser
 import os
 import pathlib
