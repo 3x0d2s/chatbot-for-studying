@@ -14,8 +14,6 @@ from scripts.check_InputData import *
 import scripts.config_pars
 #
 
-#
-
 
 def show_weekdays(event, db):
     Homework_flag = db.getUserHomewFlag(event.user_id)
@@ -51,7 +49,8 @@ def show_weekdays(event, db):
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-def operations_with_weekdays(event, db, msg):
+def operations_with_weekdays(event, db):
+    msg = event.text
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     Homework_flag = db.getUserHomewFlag(event.user_id)
     Schedule_flag = db.getUserSchedFlag(event.user_id)
@@ -173,7 +172,8 @@ def get_weekday_by_date(date: datetime.datetime) -> str:
     return weekdays[idWeekday]
 
 
-def different_operation(event, db, msg):
+def different_operation(event, db):
+    msg = event.text
     Homework_flag = db.getUserHomewFlag(event.user_id)
     addHomework_flag = db.getUserAddHomewFlag(event.user_id)
     delHomework_flag = db.getUserDelHomewFlag(event.user_id)
@@ -712,7 +712,8 @@ def set_task(event):
 
 
 @logger.catch
-def check_command(event, msg):
+def check_command(event):
+    msg = event.text
     db = requestDB(config.PATH_DB)
     Homework_flag = db.getUserHomewFlag(event.user_id)
     Schedule_flag = db.getUserSchedFlag(event.user_id)
@@ -729,7 +730,7 @@ def check_command(event, msg):
     elif msg == 'На сегодня' or msg == 'На завтра':
         operation_today_or_tomorrow(event, db)
     elif msg in ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']:
-        operations_with_weekdays(event, db, msg)
+        operations_with_weekdays(event, db)
     elif msg == 'В главное меню':
         if Schedule_flag == True:
             db.changeUserSchedFlag(event.user_id, False)
@@ -793,7 +794,7 @@ def check_command(event, msg):
         write_msg_withKeyboard(
             event.user_id, 'Главное меню', get_main_menu_keyboard(event))
     else:
-        different_operation(event, db, msg)
+        different_operation(event, db)
     db.close()
 
 
@@ -820,8 +821,7 @@ def main():
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:
                 user_processing(event)
-                msg = event.text
-                check_command(event, msg)
+                check_command(event)
 
 
 if __name__ == '__main__':
