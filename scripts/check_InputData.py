@@ -1,7 +1,7 @@
 import datetime
 
 
-def Check_Date(date):
+def check_date(date: datetime.datetime) -> bool:
     """Проверяет дату на корректность."""
     try:
         datetime.datetime.strptime(date, '%d.%m.%Y')
@@ -10,7 +10,7 @@ def Check_Date(date):
         return False
 
 
-def Check_Lesson(lesson):  # Проверка имени урока на корректность
+def check_lesson_text(lesson: str) -> bool:
     """Проверяет имя урока на длину."""
     if len(lesson) <= 32:
         return True
@@ -18,7 +18,7 @@ def Check_Lesson(lesson):  # Проверка имени урока на кор�
         return False
 
 
-def Check_Tasks(task):
+def check_task_text(task: str) -> bool:
     """Проверяет задание на длину."""
     if len(task) <= 512:
         return True

@@ -178,7 +178,7 @@ def different_operation(event, db):
     if addHomework_flag or delHomework_flag or Homework_flag or editHomework_flag == True:
         # Date
         if step_code == 0:
-            if Check_Date(msg) == True:
+            if check_date(msg) == True:
                 if len(msg) == 9:
                     msg = '0' + msg
                 db.add_HomeworkObjectToStack(event.user_id, msg, '', '', '')
@@ -201,7 +201,7 @@ def different_operation(event, db):
             if step_code == 1:
                 if editHomework_flag == True:
                     edit_homework(event, db, msg)
-                elif Check_Lesson(msg) == True:
+                elif check_lesson_text(msg) == True:
                     if addHomework_flag == True:
                         db.HomeworkStack_setLesson(event.user_id, msg)
                         db.changeUserStepCode(event.user_id, 2)
@@ -218,7 +218,7 @@ def different_operation(event, db):
                     set_lesson(event)
             # Task
             elif step_code == 2:
-                if Check_Tasks(msg) == True:
+                if check_task_text(msg) == True:
                     msg = msg.replace('''&quot;''', '''"''')
                     db.HomeworkStack_setTask(event.user_id, msg)
                     db.changeUserStepCode(event.user_id, 0)
@@ -418,9 +418,9 @@ def edit_homework(event, db, msg):
             result_text += 'Ошибка: вы не указали название урока.\n'
         if len(task_h) == 0:
             result_text += 'Ошибка: вы не указали измененное задание.\n'
-        if Check_Lesson(lesson_h) == False:
+        if check_lesson_text(lesson_h) == False:
             result_text += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
-        if Check_Tasks(task_h) == False:
+        if check_task_text(task_h) == False:
             result_text += 'Ошибка текста задания: длина не может превышать 512 символов.\n'
         if result_text == '':
             error = False
@@ -443,9 +443,9 @@ def edit_homework(event, db, msg):
             result_text += 'Ошибка: вы не указали название урока.\n'
         if len(date_h_new) == 0:
             result_text += 'Ошибка: вы не указали новую дату.\n'
-        if Check_Lesson(lesson_h) == False:
+        if check_lesson_text(lesson_h) == False:
             result_text += 'Ошибка названия урока: длина не может превышать 32 символа.\n'
-        if Check_Date(date_h_new) == False:
+        if check_date(date_h_new) == False:
             result_text += 'Ошибка даты: неверный формат.\n'
         if result_text == '':
             error = False
