@@ -18,7 +18,7 @@ FILE = PATH + '/db/db.db'
 #
 
 
-def delete_OldHomework():
+def delete_old_homework():
     db = requestDB(FILE)
     allHomework = db.get_allHomework()
     wasItDeleted = False
@@ -52,7 +52,7 @@ if not os.path.isdir(PATH + '/db/Backups'):
 if os.path.isfile(FILE):
     shutil.copy(FILE, PATH + '/db/Backups/db_' +
                 datetime.datetime.now().strftime('%Y-%m-%d') + '.db')
-    status = delete_OldHomework()
+    status = delete_old_homework()
     logfile = open(PATH + '/db/log.txt', 'a', encoding='utf-8')
     if status == True:
         logfile.write('[' + str(datetime.datetime.now()) +
