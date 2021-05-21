@@ -7,7 +7,7 @@ PATH = os.path.normpath(PATH + os.sep + os.pardir)
 
 
 def createConfig(path_file):
-    """Create a config file"""
+    """Создаёт файл конфигурации."""
     config = configparser.ConfigParser()
     config.add_section("Settings")
     config.set("Settings", "week", "1")
@@ -17,6 +17,7 @@ def createConfig(path_file):
 
 
 def getWeekConfig(path_file):
+    """Парсит конфигурацию и получаем текущий идентификатор недели."""
     if not os.path.exists(PATH + path_file):
         createConfig(path_file)
     config = configparser.ConfigParser()
@@ -26,6 +27,7 @@ def getWeekConfig(path_file):
 
 
 def changeWeekConfig(path_file):
+    """Сменяет текущий идентификатор недели."""
     if not os.path.exists(PATH + path_file):
         createConfig(path_file)
     config = configparser.ConfigParser()
