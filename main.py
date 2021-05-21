@@ -271,15 +271,10 @@ def send_schedule(event, db, weekday):
     write_msg_withKeyboard(event.user_id, msg, get_main_menu_keyboard(event))
 
 
-def get_weekday_id(weekday) -> int:
+def get_weekday_id(weekday: str) -> int:
     weekdays = ['Понедельник', 'Вторник', 'Среда',
                 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
-    idWeekday = 0
-    for w in weekdays:
-        if w == weekday:
-            return idWeekday
-        else:
-            idWeekday += 1
+    return weekdays.index(weekday)
 
 
 def send_homework(event, db, weekday=None, mode=0, today=False):
