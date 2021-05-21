@@ -41,12 +41,8 @@ def delete_OldHomework():
                 db.del_Homework(date, lesson)
                 if wasItDeleted == False:
                     wasItDeleted = True
-    #
-    if wasItDeleted == True:
-        return True
-    else:
-        return False
     db.close()
+    return wasItDeleted
 
 
 if not os.path.isdir(PATH + '/db/Backups'):
