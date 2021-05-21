@@ -241,7 +241,7 @@ def send_schedule(event, db, weekday):
             event.user_id, msg, get_main_menu_keyboard(event))
         return
     #
-    weekConfig = scripts.config_pars.getWeekConfig(config.PATH_SETTINGS)
+    weekConfig = scripts.config_pars.get_week_config(config.PATH_SETTINGS)
     if get_weekday_id(weekday) >= datetime.datetime.now().weekday():
         lesson = db.get_Lessons(weekday, weekConfig)
     else:
