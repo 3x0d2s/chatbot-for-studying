@@ -76,9 +76,10 @@
 
 ### Настройка и запуск
 
-1. Клонируйте репозиторий
+1. Клонируйте репозиторий и зайдите в его директорию
    ```sh
-   $ git clone https://github.com/3x0d2s/Chatbot-For-Studying.git
+   $ git clone https://github.com/3x0d2s/chatbot-for-studying.git
+   $ cd chatbot-for-studying
    ```
 2. Скопируйте файл `config/initial_config.py` в файл `config/config.py`
    ```sh
