@@ -242,9 +242,10 @@ def send_schedule(event, db, weekday):
             event.user_id, msg, get_main_menu_keyboard(event))
         return
     #
+    lessons = []
     weekConfig = scripts.config_pars.get_week_config(config.PATH_SETTINGS)
     if get_weekday_id(weekday) >= datetime.datetime.now().weekday():
-        lesson = db.get_Lessons(weekday, weekConfig)
+        lessons = db.get_Lessons(weekday, weekConfig)
     else:
         if weekConfig == '1':
             lessons = db.get_Lessons(weekday, '2')
@@ -621,6 +622,7 @@ def get_users(db):
 
 def check_is_new_user(user_id: int) -> bool:
     "Проверяет нет ли пользователя в БД."
+    global users
     if len(users) != 0:
         isNewUser = True
         for user in users:
@@ -632,13 +634,13 @@ def check_is_new_user(user_id: int) -> bool:
         return True
 
 
-async def user_processing(user_id: int):
+def user_processing(user_id: int):
     "Обработка пользователя, запустившего бота."
     if check_is_new_user(user_id) == True:
         db = requestDB(config.PATH_DB)
         db.add_user(user_id)
+        get_users(db)
         db.close()
-        get_users()
 
 
 def user_is_admin_check(event) -> bool:
@@ -700,7 +702,7 @@ def set_task(event):
     write_msg_withKeyboard(event.user_id, msg, keyboard)
 
 
-@logger.catch
+# @logger.catch
 def check_command(event):
     msg = event.text
     db = requestDB(config.PATH_DB)
@@ -809,7 +811,7 @@ def main():
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:
-                user_processing(event)
+                user_processing(event.user_id)
                 check_command(event)
 
 

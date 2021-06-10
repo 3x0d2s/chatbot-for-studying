@@ -11,8 +11,6 @@ import sys
 #
 sys.path.append(os.getcwd())
 #
-#
-#
 PATH = str(pathlib.Path(__file__).parent.absolute())
 PATH = os.path.normpath(PATH + os.sep + os.pardir)
 FILE = PATH + '/db/db.db'
