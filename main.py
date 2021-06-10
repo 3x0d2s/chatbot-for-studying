@@ -199,7 +199,7 @@ def different_operation(event, db):
                 msg = 'Ошибка даты: неверный формат.'
                 write_msg(event.obj.from_id, msg)
                 set_date(event)
-        if user_is_admin_check(event) == True:
+        if user_is_admin_check(event.obj.from_id) == True:
             # Lesson
             if step_code == 1:
                 if editHomework_flag == True:
@@ -241,7 +241,7 @@ def send_schedule(event, db, weekday):
     if weekday == 'Воскресенье':
         msg = 'Уроки в воскресенье? Всё нормально? Лучше поспи, отдохни, хорошо покушай.'
         write_msg_withKeyboard(
-            event.obj.from_id, msg, get_main_menu_keyboard(event))
+            event.obj.from_id, msg, get_main_menu_keyboard(event.obj.from_id))
         return
     #
     lessons = []
@@ -266,7 +266,7 @@ def send_schedule(event, db, weekday):
     for row in listLessons:
         msg += '\n' + row
     write_msg_withKeyboard(event.obj.from_id, msg,
-                           get_main_menu_keyboard(event))
+                           get_main_menu_keyboard(event.obj.from_id))
 
 
 def get_weekday_id(weekday: str) -> int:
@@ -301,7 +301,7 @@ def send_homework(event, db, weekday=None, mode=0, today=False):
                администратору - @3x0d2s(Максим Жданов).'
         db.del_HomeworkObjectFromStack(event.obj.from_id)
         write_msg_withKeyboard(
-            event.obj.from_id, msg, get_main_menu_keyboard(event))
+            event.obj.from_id, msg, get_main_menu_keyboard(event.obj.from_id))
         return
     #
     if weekday != 'Воскресенье':
@@ -346,13 +346,13 @@ def send_homework(event, db, weekday=None, mode=0, today=False):
     #
     if event.obj.from_id != None:
         write_msg_withKeyboard(event.obj.from_id, msg,
-                               get_main_menu_keyboard(event))
+                               get_main_menu_keyboard(event.obj.from_id))
     else:
         vk.messages.edit(
             peer_id=event.obj.peer_id,
             message=msg,
             conversation_message_id=event.obj.conversation_message_id,
-            keyboard=get_main_menu_keyboard(event).get_keyboard(),
+            keyboard=get_main_menu_keyboard(event.obj.user_id).get_keyboard(),
         )
     #
     if mode == 2 and weekday != 'Воскресенье':
@@ -380,13 +380,13 @@ def set_homework(event, user_id, db):
         if db.check_Homework(date, lesson) == True:
             msg = 'Домашнее задание добавлено!'
             write_msg_withKeyboard(
-                event.obj.from_id, msg, get_main_menu_keyboard(event))
+                event.obj.from_id, msg, get_main_menu_keyboard(event.obj.from_id))
             #
             today = datetime.datetime.now()
             tomorrow = today + datetime.timedelta(days=1)
             strftomorrow = tomorrow.strftime('%d.%m.%Y')
             if date == strftomorrow:
-                mailing_notifications_about_new_homework(db)
+                mailing_notifications_about_new_homework(db, user_id)
         else:
             msg = 'Домашнее задание не было добавлено.'
             keyboard = VkKeyboard(one_time=False)
@@ -406,7 +406,7 @@ def set_homework(event, user_id, db):
         write_msg_withKeyboard(event.obj.from_id, msg, keyboard)
 
 
-def mailing_notifications_about_new_homework(db):
+def mailing_notifications_about_new_homework(db, user_id):
     users = db.get_users_in_homework_f()
     #
     keyboard = VkKeyboard(one_time=False, inline=True)
@@ -419,7 +419,8 @@ def mailing_notifications_about_new_homework(db):
     msg = 'Внимание, на завтра было добавлено новое домашнее задание.'
     #
     for user in users:
-        write_msg_withKeyboard(user[0], msg, keyboard)
+        if user_id != user[0]:  # если пользователь не тот, кто добавил домашнее задание
+            write_msg_withKeyboard(user[0], msg, keyboard)
 
 
 def delete_homework(event, user_id, db):
@@ -430,7 +431,7 @@ def delete_homework(event, user_id, db):
         db.del_Homework(date, lesson)
         msg = 'Домашнее задание удалено!'
         write_msg_withKeyboard(
-            event.obj.from_id, msg, get_main_menu_keyboard(event))
+            event.obj.from_id, msg, get_main_menu_keyboard(event.obj.from_id))
     else:
         msg = 'Такого домашнего задания не существует.'
         keyboard = VkKeyboard(one_time=False)
@@ -507,7 +508,7 @@ def edit_homework(event, db, msg):
         db.changeUserStepCode(event.obj.from_id, 0)
         db.changeUserEditHomewFlag(event.obj.from_id, False)
         write_msg_withKeyboard(event.obj.from_id, result_text,
-                               get_main_menu_keyboard(event))
+                               get_main_menu_keyboard(event.obj.from_id))
 
 
 def get_homework_on_week(event, db, mode):
@@ -520,11 +521,11 @@ def get_homework_on_week(event, db, mode):
         if mode == 0:
             output = 'Домашнее задание на эту неделю не было найдено.'
             write_msg_withKeyboard(event.obj.from_id, output,
-                                   get_main_menu_keyboard(event))
+                                   get_main_menu_keyboard(event.obj.from_id))
         elif mode == 1:
             output = 'Домашнее задание на следующую неделю не было найдено.'
             write_msg_withKeyboard(event.obj.from_id, output,
-                                   get_main_menu_keyboard(event))
+                                   get_main_menu_keyboard(event.obj.from_id))
         return
     #
     if mode == 0:
@@ -607,7 +608,7 @@ def get_homework_on_week(event, db, mode):
                                 homew[1], accusative_weekday(homew[2]).lower(), homew[3]))
                         homew_goto.append(homew)
     write_msg_withKeyboard(event.obj.from_id, output,
-                           get_main_menu_keyboard(event))
+                           get_main_menu_keyboard(event.obj.from_id))
 
 
 def check_new_line_in_task_text(task) -> bool:
@@ -627,11 +628,11 @@ def write_msg_withKeyboard(user_id, message, keyboard):
                                         'random_id': 0, 'keyboard': keyboard.get_keyboard()})
 
 
-def get_main_menu_keyboard(event) -> VkKeyboard:
+def get_main_menu_keyboard(user_id) -> VkKeyboard:
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Расписание', color=VkKeyboardColor.POSITIVE)
     keyboard.add_button('Домашнее задание', color=VkKeyboardColor.POSITIVE)
-    if user_is_admin_check(event) == True:
+    if user_is_admin_check(user_id) == True:
         keyboard.add_line()
         keyboard.add_button(
             'Редактирование', color=VkKeyboardColor.SECONDARY)
@@ -681,8 +682,7 @@ def user_processing(user_id: int):
         db.close()
 
 
-def user_is_admin_check(event) -> bool:
-    user_id = event.obj.from_id
+def user_is_admin_check(user_id) -> bool:
     for user in range(len(users)):
         if user_id == users[user][0]:
             return users[user][1]  # True or False
@@ -772,7 +772,7 @@ def check_command(event):
             db.del_HomeworkObjectFromStack(event.obj.from_id)
             db.changeUserDelHomewFlag(event.obj.from_id, False)
         write_msg_withKeyboard(
-            event.obj.from_id, 'Главное меню', get_main_menu_keyboard(event))
+            event.obj.from_id, 'Главное меню', get_main_menu_keyboard(event.obj.from_id))
     elif msg == 'На неделю':
         if Homework_flag == True:
             homework_on_week_menu(event)
@@ -786,18 +786,18 @@ def check_command(event):
         if Homework_flag or addHomework_flag == True:
             set_date(event)
     elif msg == 'Редактирование':
-        if user_is_admin_check(event) == True:
+        if user_is_admin_check(event.obj.from_id) == True:
             editing(event)
     elif msg == 'Добавить домашнее задание':
-        if user_is_admin_check(event) == True:
+        if user_is_admin_check(event.obj.from_id) == True:
             db.changeUserAddHomewFlag(event.obj.from_id, True)
             show_weekdays(event, db)
     elif msg == 'Редактировать домашнее задание':
-        if user_is_admin_check(event) == True:
+        if user_is_admin_check(event.obj.from_id) == True:
             db.changeUserEditHomewFlag(event.obj.from_id, True)
             set_date(event)
     elif msg == 'Удаление домашнего задания':
-        if user_is_admin_check(event) == True:
+        if user_is_admin_check(event.obj.from_id) == True:
             db.changeUserDelHomewFlag(event.obj.from_id, True)
             set_date(event)
     elif msg == 'Отмена':
@@ -818,10 +818,10 @@ def check_command(event):
             db.changeUserStepCode(event.obj.from_id, 0)
             db.changeUserEditHomewFlag(event.obj.from_id, False)
         write_msg_withKeyboard(
-            event.obj.from_id, 'Главное меню', get_main_menu_keyboard(event))
+            event.obj.from_id, 'Главное меню', get_main_menu_keyboard(event.obj.from_id))
     elif msg == 'Начать':
         write_msg_withKeyboard(
-            event.obj.from_id, 'Главное меню', get_main_menu_keyboard(event))
+            event.obj.from_id, 'Главное меню', get_main_menu_keyboard(event.obj.from_id))
     else:
         different_operation(event, db)
     db.close()
@@ -829,10 +829,15 @@ def check_command(event):
 
 def main():
     global vk_session, session_api, longpoll, users, vk
+    #
     vk_session = VkApi(token=config.token)
     vk = vk_session.get_api()
     longpoll = VkBotLongPoll(vk_session, group_id='198873172')
+    #
     users = None
+    db = requestDB(config.PATH_DB)
+    get_users(db)
+    db.close()
     #
     logger.add('Debug.log', format="{time} {level} {message}",
                level="DEBUG", rotation="1 week", compression="zip")
@@ -842,19 +847,17 @@ def main():
         from scripts.request_db import createBD_FromDump
         createBD_FromDump(config.PATH_DB, config.PATH_DUMP)
     #
-    db = requestDB(config.PATH_DB)
-    get_users(db)
-    db.close()
-    #
     for event in longpoll.listen():
+        #
         if event.type == VkBotEventType.MESSAGE_NEW:
             if event.from_user:
                 user_processing(event.obj.from_id)
                 check_command(event)
+        #
         elif event.type == VkBotEventType.MESSAGE_EVENT:
+            #
             if event.object.payload.get("type") == "show_homework_tomorrow":
                 db = requestDB(config.PATH_DB)
-                #
                 idWeekday = datetime.datetime.now().weekday()
                 weekdays = ['Понедельник', 'Вторник', 'Среда',
                             'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
