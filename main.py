@@ -341,6 +341,8 @@ def send_homework(event, db, weekday=None, mode=0, today=False):
         msg = 'Домашнее задание на воскресенье? Совсем переучились?'
     db.del_HomeworkObjectFromStack(event.user_id)
     write_msg_withKeyboard(event.user_id, msg, get_main_menu_keyboard(event))
+    if mode == 2 and weekday != 'Воскресенье':
+        db.add_user_in_homework_f(event.user_id)
 
 
 def set_homework(event, user_id, db):
@@ -365,6 +367,12 @@ def set_homework(event, user_id, db):
             msg = 'Домашнее задание добавлено!'
             write_msg_withKeyboard(
                 event.user_id, msg, get_main_menu_keyboard(event))
+            #
+            today = datetime.datetime.now()
+            tomorrow = today + datetime.timedelta(days=1)
+            strftomorrow = tomorrow.strftime('%d.%m.%Y')
+            if date == strftomorrow:
+                mailing_notifications_about_new_homework(db)
         else:
             msg = 'Домашнее задание не было добавлено.'
             keyboard = VkKeyboard(one_time=False)
@@ -383,6 +391,13 @@ def set_homework(event, user_id, db):
         keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
         write_msg_withKeyboard(event.user_id, msg, keyboard)
 
+def mailing_notifications_about_new_homework(db):
+    users = db.get_users_in_homework_f()
+    #
+    msg = 'Внимание, на завтра было добавлено новое домашнее задание.'
+    #
+    for user in users:
+        write_msg(user[0], msg)
 
 def delete_homework(event, user_id, db):
     date = db.HomeworkStack_getDate(user_id)
