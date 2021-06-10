@@ -1,5 +1,5 @@
 --
--- Файл сгенерирован с помощью SQLiteStudio v3.2.1 в Сб май 1 12:47:04 2021
+-- Файл сгенерирован с помощью SQLiteStudio v3.2.1 в Чт июн 10 23:45:08 2021
 --
 -- Использованная кодировка текста: UTF-8
 --
@@ -8,6 +8,9 @@ BEGIN TRANSACTION;
 
 -- Таблица: homework
 CREATE TABLE homework (compl_date CHAR (10) NOT NULL, weekday CHAR (16) NOT NULL, lesson CHAR (16) NOT NULL, task CHAR (512) NOT NULL);
+
+-- Таблица: homework_f_tomorrow
+CREATE TABLE homework_f_tomorrow (user_id INTEGER UNIQUE NOT NULL);
 
 -- Таблица: homework_stack
 CREATE TABLE homework_stack (user_id CHAR NOT NULL DEFAULT noid, compl_date CHAR (10) NOT NULL, weekday CHAR (16) NOT NULL, lesson CHAR (16) NOT NULL, task CHAR (512) NOT NULL);
@@ -102,6 +105,8 @@ CREATE TABLE "users" (
 	"step_code"	INTEGER NOT NULL DEFAULT (0),
 	"editHomew_f"	BOOLEAN NOT NULL DEFAULT (False)
 );
+INSERT INTO users (user_id, isAdmin, homework_f, schedule_f, addHomew_f, delHome_f, getLessDate_f, step_code, editHomew_f) VALUES (377648563, 1, 0, 0, 0, 0, 0, 0, 0);
+INSERT INTO users (user_id, isAdmin, homework_f, schedule_f, addHomew_f, delHome_f, getLessDate_f, step_code, editHomew_f) VALUES (607216794, 0, 0, 0, 0, 0, 0, 0, 0);
 
 COMMIT TRANSACTION;
 PRAGMA foreign_keys = on;
