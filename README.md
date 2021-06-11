@@ -81,17 +81,17 @@
    $ git clone https://github.com/3x0d2s/chatbot-for-studying.git
    $ cd chatbot-for-studying
    ```
-2. Скопируйте файл `config/initial_config.py` в файл `config/config.py`
+2. Скопируйте файл `bot/config/initial_config.py` в файл `bot/config/config.py`
    ```sh
-   $ cp config/initial_config.py config/config.py
+   $ cp bot/config/initial_config.py bot/config/config.py
    ```
-3. Раскомментируйте первую строку и введите API-Token вашего бота в файле `config/config.py`. Вот так должно получиться:
+3. Раскомментируйте первую строку и введите API-Token вашего бота в файле `bot/config/config.py`. Вот так должно получиться:
    ```PY
    token = 'YOUR-API-Token'
    ```
-5. Запустите файл `main.py`
+5. Запустите файл `bot/main.py`
    ```sh
-   $ python3 main.py
+   $ python3 bot/main.py
    ```
 
 ### Добавление администратора
@@ -100,7 +100,7 @@
 
 ### Настройка еженедельного скрипта
 
-Еженедельных скрипт `newWeekScript.py` очищает БД от старого домашнего задания, предварительно делая бэкап. Чтобы настроить его еженедельное выполнение на сервере, воспользуйтесь cron.
+Еженедельных скрипт `bot/scripts/newWeekScript.py` очищает БД от старого домашнего задания, предварительно делая бэкап. Чтобы настроить его еженедельное выполнение на сервере, воспользуйтесь cron.
 
 <!-- USAGE EXAMPLES -->
 
