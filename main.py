@@ -495,6 +495,8 @@ def edit_homework(event, db, msg):
         if len(date_h_new) == 9:
             date_h_new = '0' + date_h_new
         #
+        if datetime.datetime.strptime(date_h_new, '%d.%m.%Y').weekday() == 6:
+            result_text += 'Ошибка: вы пытаетесь добавить домашнее задание на воскресенье.'
         if len(lesson_h) == 0:
             result_text += 'Ошибка: вы не указали название урока.\n'
         if len(date_h_new) == 0:
@@ -505,8 +507,7 @@ def edit_homework(event, db, msg):
             result_text += 'Ошибка даты: неверный формат.\n'
         if result_text == '':
             error = False
-            date_h_old = db.HomeworkStack_getDate(
-                event.obj.from_id)
+            date_h_old = db.HomeworkStack_getDate(event.obj.from_id)
             if db.check_Homework(date_h_old, lesson_h) == True:
                 db.editDateForHomework(date_h_old, lesson_h, date_h_new)
                 result_text = 'Домашнее задание было отредактировано.'
