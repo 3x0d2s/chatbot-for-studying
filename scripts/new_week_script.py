@@ -6,16 +6,16 @@ import pathlib
 #
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 #
-from config.config import PATH_SETTINGS, PATH_DB
-import config_pars
-from request_db import requestDB
-import datetime
 import shutil
+import datetime
+from request_db import requestDB
+import config_pars
+from config.config import PATH_SETTINGS, PATH_DB
+#
 #
 PATH = str(pathlib.Path(__file__).parent.absolute())
 PATH = os.path.normpath(PATH + os.sep + os.pardir)
 FILE = PATH + os.sep + PATH_DB
-print(FILE)
 #
 
 
