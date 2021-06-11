@@ -17,10 +17,11 @@ import scripts.config_pars
 #
 
 
-def show_weekdays(event, db):
-    Homework_flag = db.getUserHomewFlag(event.obj.from_id)
-    Schedule_flag = db.getUserSchedFlag(event.obj.from_id)
-    addHomework_flag = db.getUserAddHomewFlag(event.obj.from_id)
+def show_weekdays(user_id, db):
+    '''Генерирует клавиатуру из дней недели и вспомогательных кнопок.'''
+    Homework_flag = db.getUserHomewFlag(user_id)
+    Schedule_flag = db.getUserSchedFlag(user_id)
+    addHomework_flag = db.getUserAddHomewFlag(user_id)
     #
     msg = 'Выберите...'
     #
@@ -48,10 +49,11 @@ def show_weekdays(event, db):
     keyboard.add_button('Суббота', color=VkKeyboardColor.SECONDARY)
     keyboard.add_line()
     keyboard.add_button('В главное меню', color=VkKeyboardColor.POSITIVE)
-    write_msg_withKeyboard(event.obj.from_id, msg, keyboard)
+    write_msg_withKeyboard(user_id, msg, keyboard)
 
 
 def operations_with_weekdays(event, db):
+    '''Функция, проводящая определенные операции при нажатии на какой-либо из дней недели.'''
     msg = event.obj.text
     addHomework_flag = db.getUserAddHomewFlag(event.obj.from_id)
     Homework_flag = db.getUserHomewFlag(event.obj.from_id)
@@ -70,10 +72,11 @@ def operations_with_weekdays(event, db):
         date = get_date_by_weekday(weekday)
         db.add_HomeworkObjectToStack(event.obj.from_id, date, weekday, '', '')
         db.changeUserStepCode(event.obj.from_id, (step_code + 1))
-        set_lesson(event)
+        get_lesson(event)
 
 
 def operation_today_or_tomorrow(event, db):
+    '''Функция, проводящая определенные операции при нажатии на кнопки "На сегодня" и "На завтра".'''
     Schedule_flag = db.getUserSchedFlag(event.obj.from_id)
     Homework_flag = db.getUserHomewFlag(event.obj.from_id)
     addHomework_flag = db.getUserAddHomewFlag(event.obj.from_id)
@@ -114,10 +117,11 @@ def operation_today_or_tomorrow(event, db):
                 db.add_HomeworkObjectToStack(
                     event.obj.from_id, date, weekday, '', '')
             db.changeUserStepCode(event.obj.from_id, 1)
-            set_lesson(event)
+            get_lesson(event)
 
 
 def accusative_weekday(weekday) -> str:
+    '''Функция перевода названия дня недели в винительный падеж, если это требуется.'''
     if weekday == 'Среда':
         return 'Среду'
     elif weekday == 'Пятница':
@@ -129,6 +133,7 @@ def accusative_weekday(weekday) -> str:
 
 
 def set_weekday(user_id, db, value=None):
+    '''Функция сохранения дня недели в стак в БД.'''
     if value == None:
         date = db.HomeworkStack_getDate(user_id)
         idWeekday = datetime.datetime.strptime(date, '%d.%m.%Y').weekday()
@@ -142,6 +147,7 @@ def set_weekday(user_id, db, value=None):
 
 
 def get_date_by_weekday(weekday: str) -> str:
+    '''Функция получения даты по дню недели.'''
     weekdays = ['Понедельник', 'Вторник', 'Среда',
                 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
     idSecondWeekday = weekdays.index(weekday)
@@ -163,13 +169,22 @@ def get_date_by_weekday(weekday: str) -> str:
 
 
 def get_weekday_by_date(date: datetime.datetime) -> str:
+    '''Функция получения дня недели по дате.'''
     idWeekday = date.weekday()
     weekdays = ['Понедельник', 'Вторник', 'Среда',
                 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
     return weekdays[idWeekday]
 
 
+def get_weekday_id(weekday: str) -> int:
+    '''Функция получения ID дня недели.'''
+    weekdays = ['Понедельник', 'Вторник', 'Среда',
+                'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+    return weekdays.index(weekday)
+
+
 def different_operation(event, db):
+    '''Функция, проводящая определенные операции, в зависимости от того что написал пользователь и при каком условии.'''
     msg = event.obj.text
     Homework_flag = db.getUserHomewFlag(event.obj.from_id)
     addHomework_flag = db.getUserAddHomewFlag(event.obj.from_id)
@@ -191,15 +206,15 @@ def different_operation(event, db):
                     db.changeUserHomewFlag(event.obj.from_id, False)
                 elif addHomework_flag or delHomework_flag == True:
                     db.changeUserStepCode(event.obj.from_id, 1)
-                    set_lesson(event)
+                    get_lesson(event)
                 elif editHomework_flag == True:
                     db.changeUserStepCode(event.obj.from_id, 1)
-                    get_edit_command(event)
+                    send_edit_help_text(event)
             else:
                 msg = 'Ошибка даты: неверный формат.'
                 write_msg(event.obj.from_id, msg)
-                set_date(event)
-        if user_is_admin_check(event.obj.from_id) == True:
+                get_date(event)
+        if check_user_is_admin(event.obj.from_id) == True:
             # Lesson
             if step_code == 1:
                 if editHomework_flag == True:
@@ -208,7 +223,7 @@ def different_operation(event, db):
                     if addHomework_flag == True:
                         db.HomeworkStack_setLesson(event.obj.from_id, msg)
                         db.changeUserStepCode(event.obj.from_id, 2)
-                        set_task(event)
+                        get_task(event)
                     elif delHomework_flag == True:
                         db.HomeworkStack_setLesson(event.obj.from_id, msg)
                         db.changeUserStepCode(event.obj.from_id, 0)
@@ -218,7 +233,7 @@ def different_operation(event, db):
                 else:
                     msg = 'Ошибка названия урока: длина не может превышать 16 символов.'
                     write_msg(event.obj.from_id, msg)
-                    set_lesson(event)
+                    get_lesson(event)
             # Task
             elif step_code == 2:
                 if check_task_text(msg) == True:
@@ -231,13 +246,14 @@ def different_operation(event, db):
                 else:
                     msg = 'Ошибка задач: длина не может превышать 512 символов.'
                     write_msg(event.obj.from_id, msg)
-                    set_task(event)
+                    get_task(event)
     else:
         msg = 'Данной команды не существует.'
         write_msg(event.obj.from_id, msg)
 
 
 def send_schedule(event, db, weekday):
+    '''Функция отправки пользователю расписания.'''
     if weekday == 'Воскресенье':
         msg = 'Уроки в воскресенье? Всё нормально? Лучше поспи, отдохни, хорошо покушай.'
         write_msg_withKeyboard(
@@ -269,13 +285,8 @@ def send_schedule(event, db, weekday):
                            get_main_menu_keyboard(event.obj.from_id))
 
 
-def get_weekday_id(weekday: str) -> int:
-    weekdays = ['Понедельник', 'Вторник', 'Среда',
-                'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
-    return weekdays.index(weekday)
-
-
 def send_homework(event, db, weekday=None, mode=0, today=False):
+    '''Функция отправки домашнего задания на определенный день или дату.'''
     msg = ''
     date = None
     #
@@ -360,6 +371,7 @@ def send_homework(event, db, weekday=None, mode=0, today=False):
 
 
 def set_homework(event, user_id, db):
+    '''Функция добавления домашнего задания в БД.'''
     date = db.HomeworkStack_getDate(user_id)
     weekDay = db.HomeworkStack_getWeekday(user_id)
     lesson = db.HomeworkStack_getLesson(user_id)
@@ -407,6 +419,7 @@ def set_homework(event, user_id, db):
 
 
 def mailing_notifications_about_new_homework(db, user_id):
+    '''Функция рассылки оповещения о новом домашнем задании на завтра людям, предварительно сегодня посмотревших ДЗ на завтрашний день.'''
     users = db.get_users_in_homework_f()
     #
     keyboard = VkKeyboard(one_time=False, inline=True)
@@ -424,6 +437,7 @@ def mailing_notifications_about_new_homework(db, user_id):
 
 
 def delete_homework(event, user_id, db):
+    '''Функция удаления домашнего задания из БД.'''
     date = db.HomeworkStack_getDate(user_id)
     lesson = db.HomeworkStack_getLesson(user_id)
     #
@@ -443,6 +457,7 @@ def delete_homework(event, user_id, db):
 
 
 def edit_homework(event, db, msg):
+    '''Функция редактирования ДЗ.'''
     result_text = ''
     error = True
     pattern_1 = re.compile('::')  # For change task
@@ -502,7 +517,7 @@ def edit_homework(event, db, msg):
     #
     if error == True:
         write_msg(event.obj.from_id, result_text)
-        get_edit_command(event)
+        send_edit_help_text(event)
     else:
         db.del_HomeworkObjectFromStack(event.obj.from_id)
         db.changeUserStepCode(event.obj.from_id, 0)
@@ -511,8 +526,10 @@ def edit_homework(event, db, msg):
                                get_main_menu_keyboard(event.obj.from_id))
 
 
-def get_homework_on_week(event, db, mode):
-    ''' mode:
+def send_homework_on_week(event, db, mode):
+    ''' Функция отправки всего домашнего задания на определенную неделю.
+
+        mode:
         0 - this week
         1 - next week'''
     allHomework = db.get_allHomework()
@@ -607,11 +624,13 @@ def get_homework_on_week(event, db, mode):
                             output += str('🔺 {0} на {1}: {2}\n'.format(
                                 homew[1], accusative_weekday(homew[2]).lower(), homew[3]))
                         homew_goto.append(homew)
+    #
     write_msg_withKeyboard(event.obj.from_id, output,
                            get_main_menu_keyboard(event.obj.from_id))
 
 
 def check_new_line_in_task_text(task) -> bool:
+    '''Проверка новой строки в тексте задания.'''
     pattern = re.compile(r'\n')
     if pattern.findall(task):
         return True
@@ -619,20 +638,23 @@ def check_new_line_in_task_text(task) -> bool:
 
 
 def write_msg(user_id, message):
+    '''Функция отправки сообщения без клавиатуры.'''
     vk_session.method('messages.send', {
                       'user_id': user_id, 'message': str(message), 'random_id': 0})
 
 
 def write_msg_withKeyboard(user_id, message, keyboard):
+    '''Функция отправки сообщения с клавиатурой.'''
     vk_session.method('messages.send', {'user_id': user_id, 'message': str(message),
                                         'random_id': 0, 'keyboard': keyboard.get_keyboard()})
 
 
 def get_main_menu_keyboard(user_id) -> VkKeyboard:
+    '''Функция генерации главной клавиатуры.'''
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Расписание', color=VkKeyboardColor.POSITIVE)
     keyboard.add_button('Домашнее задание', color=VkKeyboardColor.POSITIVE)
-    if user_is_admin_check(user_id) == True:
+    if check_user_is_admin(user_id) == True:
         keyboard.add_line()
         keyboard.add_button(
             'Редактирование', color=VkKeyboardColor.SECONDARY)
@@ -640,6 +662,7 @@ def get_main_menu_keyboard(user_id) -> VkKeyboard:
 
 
 def get_editing_keyboard() -> VkKeyboard:
+    '''Функция генерации клавиатуры редактирования. Только для администраторов.'''
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Добавить домашнее задание',
                         color=VkKeyboardColor.SECONDARY)
@@ -654,7 +677,28 @@ def get_editing_keyboard() -> VkKeyboard:
     return keyboard
 
 
+def send_homework_on_week_text_and_keyboard(event):
+    '''Генерирует клавиатуру для выбора недели, на которую нужно прислать ДЗ, и отсылает её.'''
+    date_now = datetime.datetime.now()
+    weekday_now = get_weekday_by_date(date_now)
+    if weekday_now not in ('Суббота', 'Воскресенье'):
+        msg = 'Выберите...'
+        keyboard = VkKeyboard(one_time=False)
+        keyboard.add_button('На эту', color=VkKeyboardColor.SECONDARY)
+        keyboard.add_line()
+        keyboard.add_button('На следующую', color=VkKeyboardColor.SECONDARY)
+        keyboard.add_line()
+        keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
+        write_msg_withKeyboard(event.obj.from_id, msg, keyboard)
+    else:
+        db = requestDB(config.PATH_DB)
+        send_homework_on_week(event, db, 1)
+        db.changeUserHomewFlag(event.obj.from_id, False)
+        db.close()
+
+
 def get_users(db):
+    '''Функция получения всех пользователей из БД.'''
     global users
     users = db.get_users()
 
@@ -674,7 +718,7 @@ def check_is_new_user(user_id: int) -> bool:
 
 
 def user_processing(user_id: int):
-    "Обработка пользователя, запустившего бота."
+    "Обработка пользователя, написавшего боту."
     if check_is_new_user(user_id) == True:
         db = requestDB(config.PATH_DB)
         db.add_user(user_id)
@@ -682,58 +726,45 @@ def user_processing(user_id: int):
         db.close()
 
 
-def user_is_admin_check(user_id) -> bool:
+def check_user_is_admin(user_id) -> bool:
+    '''Проверяет администратор ли пользователь.'''
     for user in range(len(users)):
         if user_id == users[user][0]:
             return users[user][1]  # True or False
 
 
-def homework_on_week_menu(event):
-    date_now = datetime.datetime.now()
-    weekday_now = get_weekday_by_date(date_now)
-    if weekday_now not in ('Суббота', 'Воскресенье'):
-        msg = 'Выберите...'
-        keyboard = VkKeyboard(one_time=False)
-        keyboard.add_button('На эту', color=VkKeyboardColor.SECONDARY)
-        keyboard.add_line()
-        keyboard.add_button('На следующую', color=VkKeyboardColor.SECONDARY)
-        keyboard.add_line()
-        keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
-        write_msg_withKeyboard(event.obj.from_id, msg, keyboard)
-    else:
-        db = requestDB(config.PATH_DB)
-        get_homework_on_week(event, db, 1)
-        db.changeUserHomewFlag(event.obj.from_id, False)
-        db.close()
-
-
-def get_edit_command(event):
+def send_edit_help_text(event):
+    '''Отправляет текстовое сообщения с инструкцией для редактирования ДЗ.'''
     msg = 'Введите команду в формате:\n🔺 Для изменения задания:\n(Название урока)::(Новое задание)\n🔺 Для изменения даты:\n(Название урока)@@(Новая дата)'
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     write_msg_withKeyboard(event.obj.from_id, msg, keyboard)
 
 
-def editing(event):
+def send_editing_text_and_keyboard(event):
+    '''Отправляет сообщения с клавиатурой редактирования.'''
     msg = 'Выберите действие...'
     write_msg_withKeyboard(event.obj.from_id, msg, get_editing_keyboard())
 
 
-def set_date(event):
+def get_date(event):
+    '''Функция, которая предлагает пользователю ввести дату.'''
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Введите число в формате (День).(Месяц).(Год). Например 03.11.2018'
     write_msg_withKeyboard(event.obj.from_id, msg, keyboard)
 
 
-def set_lesson(event):
+def get_lesson(event):
+    '''Функция, которая предлагает пользователю ввести название урока.'''
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Введите название урока...'
     write_msg_withKeyboard(event.obj.from_id, msg, keyboard)
 
 
-def set_task(event):
+def get_task(event):
+    '''Функция, которая предлагает пользователю ввести задачу.'''
     keyboard = VkKeyboard(one_time=False)
     keyboard.add_button('Отмена', color=VkKeyboardColor.NEGATIVE)
     msg = 'Введите все задачи...'
@@ -742,6 +773,7 @@ def set_task(event):
 
 # @logger.catch
 def check_command(event):
+    '''Функция, проверяющая команду от пользователя и запускающая определенный сценарий.'''
     msg = event.obj.text
     db = requestDB(config.PATH_DB)
     Homework_flag = db.getUserHomewFlag(event.obj.from_id)
@@ -752,10 +784,10 @@ def check_command(event):
     #
     if msg == 'Домашнее задание':
         db.changeUserHomewFlag(event.obj.from_id, True)
-        show_weekdays(event, db)
+        show_weekdays(event.obj.from_id, db)
     elif msg == 'Расписание':
         db.changeUserSchedFlag(event.obj.from_id, True)
-        show_weekdays(event, db)
+        show_weekdays(event.obj.from_id, db)
     elif msg == 'На сегодня' or msg == 'На завтра':
         operation_today_or_tomorrow(event, db)
     elif msg in ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']:
@@ -775,31 +807,31 @@ def check_command(event):
             event.obj.from_id, 'Главное меню', get_main_menu_keyboard(event.obj.from_id))
     elif msg == 'На неделю':
         if Homework_flag == True:
-            homework_on_week_menu(event)
+            send_homework_on_week_text_and_keyboard(event)
     elif msg == 'На эту':
-        get_homework_on_week(event, db, 0)
+        send_homework_on_week(event, db, 0)
         db.changeUserHomewFlag(event.obj.from_id, False)
     elif msg == 'На следующую':
-        get_homework_on_week(event, db, 1)
+        send_homework_on_week(event, db, 1)
         db.changeUserHomewFlag(event.obj.from_id, False)
     elif msg == 'Указать число':
         if Homework_flag or addHomework_flag == True:
-            set_date(event)
+            get_date(event)
     elif msg == 'Редактирование':
-        if user_is_admin_check(event.obj.from_id) == True:
-            editing(event)
+        if check_user_is_admin(event.obj.from_id) == True:
+            send_editing_text_and_keyboard(event)
     elif msg == 'Добавить домашнее задание':
-        if user_is_admin_check(event.obj.from_id) == True:
+        if check_user_is_admin(event.obj.from_id) == True:
             db.changeUserAddHomewFlag(event.obj.from_id, True)
-            show_weekdays(event, db)
+            show_weekdays(event.obj.from_id, db)
     elif msg == 'Редактировать домашнее задание':
-        if user_is_admin_check(event.obj.from_id) == True:
+        if check_user_is_admin(event.obj.from_id) == True:
             db.changeUserEditHomewFlag(event.obj.from_id, True)
-            set_date(event)
+            get_date(event)
     elif msg == 'Удаление домашнего задания':
-        if user_is_admin_check(event.obj.from_id) == True:
+        if check_user_is_admin(event.obj.from_id) == True:
             db.changeUserDelHomewFlag(event.obj.from_id, True)
-            set_date(event)
+            get_date(event)
     elif msg == 'Отмена':
         if addHomework_flag == True:
             db.del_HomeworkObjectFromStack(event.obj.from_id)
@@ -828,6 +860,7 @@ def check_command(event):
 
 
 def main():
+    '''Главная функция инициализации и запуска бота.'''
     global vk_session, session_api, longpoll, users, vk
     #
     vk_session = VkApi(token=config.token)
