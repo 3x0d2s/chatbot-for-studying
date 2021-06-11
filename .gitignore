@@ -1,6 +1,6 @@
 # Directories
 **/__pycache__/
-/.vscode/
+/bot/.vscode/
 /bot/db/Backups/
 
 # Files
