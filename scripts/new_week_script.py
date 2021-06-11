@@ -1,19 +1,21 @@
 # -*- coding: utf8 -*-
 #
-from config.config import PATH_SETTINGS
-import config_pars
-from request_db import requestDB
-import pathlib
-import datetime
-import shutil
 import os
 import sys
+import pathlib
 #
-sys.path.append(os.getcwd())
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+#
+from config.config import PATH_SETTINGS, PATH_DB
+import config_pars
+from request_db import requestDB
+import datetime
+import shutil
 #
 PATH = str(pathlib.Path(__file__).parent.absolute())
 PATH = os.path.normpath(PATH + os.sep + os.pardir)
-FILE = PATH + '/db/db.db'
+FILE = PATH + os.sep + PATH_DB
+print(FILE)
 #
 
 
@@ -44,15 +46,15 @@ def delete_old_homework():
     return wasItDeleted
 
 
-if not os.path.isdir(PATH + '/db/Backups'):
-    os.mkdir(PATH + '/db/Backups')
+if not os.path.isdir(PATH + f'{os.sep}db{os.sep}Backups'):
+    os.mkdir(PATH + f'{os.sep}db{os.sep}Backups')
 
 
 if os.path.isfile(FILE):
-    shutil.copy(FILE, PATH + '/db/Backups/db_' +
+    shutil.copy(FILE, PATH + f'{os.sep}db{os.sep}Backups{os.sep}db_' +
                 datetime.datetime.now().strftime('%Y-%m-%d') + '.db')
     status = delete_old_homework()
-    logfile = open(PATH + '/db/log.txt', 'a', encoding='utf-8')
+    logfile = open(PATH + f'{os.sep}db{os.sep}log.txt', 'a', encoding='utf-8')
     if status == True:
         logfile.write('[' + str(datetime.datetime.now()) +
                       '] - Cоздан бэкап базы данных, старое домашнее задание очищено.\n')
@@ -61,7 +63,7 @@ if os.path.isfile(FILE):
                       '] - Cоздан бэкап базы данных, старое домашнее задание не было найдено.\n')
     logfile.close()
 else:
-    logfile = open(PATH + '/db/log.txt', 'a', encoding='utf-8')
+    logfile = open(PATH + f'{os.sep}db{os.sep}log.txt', 'a', encoding='utf-8')
     logfile.write('[' + str(datetime.datetime.now()) +
                   '] - Ошибка бэкапа: отсуствует файл БД.\n')
     logfile.close()

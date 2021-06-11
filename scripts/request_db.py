@@ -120,6 +120,10 @@ class requestDB:
         with self.connection:
             return self.cursor.execute("INSERT OR IGNORE INTO `homework_f_tomorrow` (`user_id`) VALUES(?) ", (user_id,))
 
+    def clear_tabl_homew_us_f(self):
+        with self.connection:
+            return self.cursor.execute("DELETE FROM `homework_f_tomorrow`")
+
     def get_users_in_homework_f(self):
         with self.connection:
             self.cursor.execute("SELECT * FROM `homework_f_tomorrow`")
