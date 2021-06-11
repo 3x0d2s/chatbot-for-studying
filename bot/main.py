@@ -869,9 +869,6 @@ def main():
     longpoll = VkBotLongPoll(vk_session, group_id='198873172')
     #
     users = None
-    db = requestDB(config.PATH_DB)
-    get_users(db)
-    db.close()
     #
     logger.add('Debug.log', format="{time} {level} {message}",
                level="DEBUG", rotation="1 week", compression="zip")
@@ -880,6 +877,10 @@ def main():
     if not os.path.isfile(config.PATH_DB):
         from scripts.request_db import createBD_FromDump
         createBD_FromDump(config.PATH_DB, config.PATH_DUMP)
+    #
+    db = requestDB(config.PATH_DB)
+    get_users(db)
+    db.close()
     #
     for event in longpoll.listen():
         #

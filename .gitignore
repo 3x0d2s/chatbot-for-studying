@@ -1,13 +1,13 @@
 # Directories
 **/__pycache__/
 /.vscode/
-/db/Backups/
+/bot/db/Backups/
 
 # Files
-/config/config.py
-/config/Settings.ini
+/bot/config/config.py
+/bot/config/Settings.ini
 /.main.py.swp
 /*.zip
-/Debug.log
-/db/db.db
-/db/log.txt
+/bot/Debug.log
+/bot/db/db.db
+/bot/db/log.txt
