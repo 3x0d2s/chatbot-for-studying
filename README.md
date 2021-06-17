@@ -85,9 +85,10 @@
    ```sh
    $ cp bot/config/initial_config.py bot/config/config.py
    ```
-3. Раскомментируйте первую строку и введите API-Token вашего бота в файле `bot/config/config.py`. Вот так должно получиться:
+3. Раскомментируйте строки токена и id вашей группы и заполните их своими значениями в файле `bot/config/config.py`. Вот так должно получиться:
    ```PY
-   token = 'YOUR-API-Token'
+   TOKEN = "YOUR_API_TOKEN"
+   GROUP_ID = 'YOUR_GROUP_ID'
    ```
 5. Запустите файл `bot/main.py`
    ```sh
