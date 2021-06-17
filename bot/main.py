@@ -864,9 +864,9 @@ def main():
     '''Главная функция инициализации и запуска бота.'''
     global vk_session, session_api, longpoll, users, vk
     #
-    vk_session = VkApi(token=config.token)
+    vk_session = VkApi(token=config.TOKEN)
     vk = vk_session.get_api()
-    longpoll = VkBotLongPoll(vk_session, group_id='198873172')
+    longpoll = VkBotLongPoll(vk_session, group_id=config.GROUP_ID)
     #
     users = None
     #
