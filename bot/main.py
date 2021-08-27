@@ -429,7 +429,7 @@ def mailing_notifications_about_new_homework(db, user_id):
         payload={"type": "show_homework_tomorrow"},
     )
     #
-    msg = 'Внимание, на завтра было добавлено новое домашнее задание.'
+    msg = 'Внимание, на завтра было добавлено новое домашнее задание❗'
     #
     for user in users:
         if user_id != user[0]:  # если пользователь не тот, кто добавил домашнее задание
