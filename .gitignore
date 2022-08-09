@@ -11,4 +11,8 @@
 /bot/Debug.log
 /bot/db/db.db
 /bot/db/log.txt
+<<<<<<< HEAD
 env/
+=======
+env/
+>>>>>>> b311d2efff1473b64e94bd3412ad33accbb483db
