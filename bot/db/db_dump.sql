@@ -116,8 +116,8 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"step_code"	INTEGER NOT NULL DEFAULT (0),
 	"editHomew_f"	BOOLEAN NOT NULL DEFAULT (False)
 );
-INSERT INTO users (user_id, isAdmin, homework_f, schedule_f, addHomew_f, delHome_f, getLessDate_f, step_code, editHomew_f) VALUES (377648563, 1, 0, 0, 0, 0, 0, 0, 0);
-INSERT INTO users (user_id, isAdmin, homework_f, schedule_f, addHomew_f, delHome_f, getLessDate_f, step_code, editHomew_f) VALUES (238172309, 0, 0, 0, 0, 0, 0, 0, 0);
+-- можно раскомментировать строку снизу и вписать ID аккаунта вместо 7777777, тем самым сделать нужный аккаунт администратором сразу
+-- INSERT INTO users (user_id, isAdmin, homework_f, schedule_f, addHomew_f, delHome_f, getLessDate_f, step_code, editHomew_f) VALUES (7777777, 1, 0, 0, 0, 0, 0, 0, 0);
 
 COMMIT TRANSACTION;
 PRAGMA foreign_keys = on;
