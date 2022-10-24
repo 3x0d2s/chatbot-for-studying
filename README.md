@@ -84,6 +84,7 @@
    TOKEN = "YOUR_API_TOKEN"
    GROUP_ID = 'YOUR_GROUP_ID'
    ```
+   В сообществе должна быть выбрана Long Poll - 5.80
    Подробнее про получение токена [тут](https://vk.com/dev.php?f=1.1.%20%D0%9F%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%D0%BB%D1%8E%D1%87%D0%B0%20%D0%B4%D0%BE%D1%81%D1%82%D1%83%D0%BF%D0%B0&method=bots_docs)
 5. Откройте файл `bot/db/db_dump.sql` и заполните его своим расписаем подобно тому, как оно заполнено изначально
 6. Запустите файл `bot/main.py`
